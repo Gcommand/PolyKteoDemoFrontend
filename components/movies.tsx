@@ -6,7 +6,7 @@ import { SearchResult } from "@/types/search";
 import { useState, useEffect } from "react";
 
 const Movies = () => {
-  const results = useAtomValue(moviesAtom) as SearchResult[];
+  const results = useAtomValue(moviesAtom) as unknown as SearchResult[];
   const pagination = useAtomValue(paginationAtom);
   const [, searchHandler] = useAtom(searchAtom);
   const sortingOrder = useAtomValue(sortingOrderAtom);
