@@ -14,16 +14,17 @@ const SearchBar = () => {
   const [pageSize, setPageSize] = useState(10);
   const results = useAtomValue(moviesAtom);
   const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
 
   const keyPressHandler = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Enter") {
-        searchHandler(Action.SEARCH, sortingOrder, currentPage, pageSize, selectedDepartment);
+        searchHandler(Action.SEARCH, sortingOrder, currentPage, pageSize, selectedDepartment, selectedCategory);
       } else if (e.key === "Escape") {
         setQuery("");
       }
     },
-    [searchHandler, setQuery, sortingOrder, currentPage, pageSize, selectedDepartment]
+    [searchHandler, setQuery, sortingOrder, currentPage, pageSize, selectedDepartment, selectedCategory]
   );
 
   // Keyboard Event Listener
@@ -67,7 +68,7 @@ const SearchBar = () => {
         ) : (
           <button
             onClick={() => {
-              searchHandler(Action.SEARCH, sortingOrder, 1, pageSize, selectedDepartment);
+              searchHandler(Action.SEARCH, sortingOrder, 1, pageSize, selectedDepartment, selectedCategory);
             }}
             className="search-button inline-block px-3 py-2 text-sm rounded-md transition-colors"
           >
@@ -77,18 +78,43 @@ const SearchBar = () => {
       </div>
 
       <div className="flex items-center w-full mt-2 px-4 py-2 gap-4">
-        <div className="search-sort ml-auto flex gap-2 items-center">
+        <div className="search-sort ml-auto flex gap-2 items-center w-full">
           <select
-              id="department-select"
-              value={selectedDepartment}
-              onChange={(e) => {
-                setSelectedDepartment(e.target.value);
-                // Only trigger search if there is a query
-                if (query.length > 0) {
-                  searchHandler(Action.SEARCH, sortingOrder, currentPage, pageSize, e.target.value);
-                }
-              }}
-              className="px-3 py-1 text-sm rounded-md border border-gray-300 bg-white focus:outline-none focus:border-blue-400 transition-colors"
+            id="category-select"
+            value={selectedCategory}
+            onChange={(e) => {
+              setSelectedCategory(e.target.value);
+              if (query.length > 0) {
+                searchHandler(Action.SEARCH, sortingOrder, currentPage, pageSize, selectedDepartment, e.target.value);
+              }
+            }}
+            className="flex-1 min-w-0 px-3 py-1 text-sm rounded-md border border-gray-300 bg-white focus:outline-none focus:border-blue-400 transition-colors"
+          >
+            <option value="">All Categories</option>
+            <option value="Foodtech/Biotech/Pharmaceutical">Foodtech/Biotech/Pharmaceutical</option>
+            <option value="Other">Other</option>
+            <option value="Information and Communications Technology">Information and Communications Technology</option>
+            <option value="Electrical & Manufacturing/Information and Communications Technology">Electrical & Manufacturing/Information and Communications Technology</option>
+            <option value="Healthcare">Healthcare</option>
+            <option value="Construction">Construction</option>
+            <option value="Material Science">Material Science</option>
+            <option value="Foodtech/Biotech/Pharmaceutical/Healthcare">Foodtech/Biotech/Pharmaceutical/Healthcare</option>
+            <option value="Electrical & Manufacturing/Foodtech/Biotech/Pharmaceutical">Electrical & Manufacturing/Foodtech/Biotech/Pharmaceutical</option>
+            <option value="Electrical & Manufacturing">Electrical & Manufacturing</option>
+            <option value="Healthcare/Textile">Healthcare/Textile</option>
+            <option value="Textile">Textile</option>
+          </select>
+          <select
+            id="department-select"
+            value={selectedDepartment}
+            onChange={(e) => {
+              setSelectedDepartment(e.target.value);
+              // Only trigger search if there is a query
+              if (query.length > 0) {
+                searchHandler(Action.SEARCH, sortingOrder, currentPage, pageSize, e.target.value, selectedCategory);
+              }
+            }}
+            className="flex-1 min-w-0 px-3 py-1 text-sm rounded-md border border-gray-300 bg-white focus:outline-none focus:border-blue-400 transition-colors"
           >
             <option value="">All Departments</option>
             <option value="1">Department of Aeronautical and Aviation Engineering</option>
@@ -130,16 +156,16 @@ const SearchBar = () => {
             <option value="37">Research Institute of Innovative Products & Technologies</option>
           </select>
           <select
-              id="control-sort"
-              value={sortingOrder}
-              onChange={(e) => {
-                setSortingOrder(e.target.value);
-                // Only trigger search if there are existing results
-                if (results.length > 0) {
-                  searchHandler(Action.SEARCH, e.target.value, currentPage, pageSize, selectedDepartment);
-                }
-              }}
-              className="px-3 py-1 text-sm rounded-md border border-gray-300 bg-white focus:outline-none focus:border-blue-400 transition-colors"
+            id="control-sort"
+            value={sortingOrder}
+            onChange={(e) => {
+              setSortingOrder(e.target.value);
+              // Only trigger search if there are existing results
+              if (results.length > 0) {
+                searchHandler(Action.SEARCH, e.target.value, currentPage, pageSize, selectedDepartment, selectedCategory);
+              }
+            }}
+            className="flex-1 min-w-0 px-3 py-1 text-sm rounded-md border border-gray-300 bg-white focus:outline-none focus:border-blue-400 transition-colors"
           >
             <option value="REL_DESC">Sort by Relevance: Descending</option>
             <option value="REL_ASC">Sort by Relevance: Ascending</option>

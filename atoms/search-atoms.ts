@@ -37,12 +37,23 @@ export interface SearchResult {
 }
 
 // Search Handler Function
-const searchHandler = async (query: string, confidenceLevel: number = 0.25, sortingOrder: string = "REL_DESC", currentPage: number = 1, pageSize: number = 10, departmentNumber?: string) => {
+const searchHandler = async (
+  query: string,
+  confidenceLevel: number = 0.25,
+  sortingOrder: string = "REL_DESC",
+  currentPage: number = 1,
+  pageSize: number = 10,
+  departmentNumber?: string,
+  techSector?: string
+) => {
   try {
     // Use our local API proxy instead of calling the external API directly
     let url = `/api/search?query=${encodeURIComponent(query)}&confidence_level=${confidenceLevel}&sorting_order=${sortingOrder}&current_page=${currentPage}&page_size=${pageSize}`;
     if (departmentNumber && departmentNumber !== "") {
       url += `&department=${departmentNumber}`;
+    }
+    if (techSector && techSector !== "") {
+      url += `&tech_sector=${encodeURIComponent(techSector)}`;
     }
     const res = await fetch(url);
     if (!res.ok) {
@@ -112,7 +123,16 @@ export const paginationAtom = atom<PaginationInfo>({
 
 export const searchAtom = atom(
   (get) => get(searchActiveAtom),
-  async (get, set, action: Action, sortingOrder: string = "REL_DESC", currentPage: number = 1, pageSize: number = 10, departmentNumber?: string) => {
+  async (
+    get,
+    set,
+    action: Action,
+    sortingOrder: string = "REL_DESC",
+    currentPage: number = 1,
+    pageSize: number = 10,
+    departmentNumber?: string,
+    techSector?: string
+  ) => {
     const query = get(queryAtom);
     const confidenceLevel = get(confidenceLevelAtom);
     if (action === Action.SEARCH) {
@@ -120,7 +140,7 @@ export const searchAtom = atom(
         return;
       } else {
         set(searchActiveAtom, true);
-        const { results, pagination } = await searchHandler(query, confidenceLevel, sortingOrder, currentPage, pageSize, departmentNumber);
+        const { results, pagination } = await searchHandler(query, confidenceLevel, sortingOrder, currentPage, pageSize, departmentNumber, techSector);
         set(moviesAtom, results);
         set(paginationAtom, pagination);
         set(searchActiveAtom, false);

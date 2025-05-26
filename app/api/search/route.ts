@@ -8,6 +8,7 @@ export async function GET(request: Request) {
   const currentPage = searchParams.get("current_page") || "1";
   const pageSize = searchParams.get("page_size") || "10";
   const department = searchParams.get("department");
+  const techSector = searchParams.get("tech_sector");
 
   if (!query) {
     return NextResponse.json({ error: "No query provided" });
@@ -17,6 +18,9 @@ export async function GET(request: Request) {
   // let baseUrl = `https://poly-kteo-poc-d4c9fkgrbaahe5hg.eastasia-01.azurewebsites.net/search?query=${encodeURIComponent(query)}&confidence_level=${confidenceLevel}&sorting_order=${sortingOrder}&current_page=${currentPage}&page_size=${pageSize}`;
   if (department) {
     baseUrl += `&department=${department}`;
+  }
+  if (techSector) {
+    baseUrl += `&tech_sector=${encodeURIComponent(techSector)}`;
   }
 
   try {
