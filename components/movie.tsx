@@ -253,7 +253,7 @@ const Movie = ({ result }: { result: SearchResult }) => {
                 <h4 className="text-lg font-semibold mb-3 text-[#a02337]">Patent Figures</h4>
                 <div className="relative">
                   <div className="relative h-[400px] w-full bg-gray-100 rounded-lg overflow-hidden mb-2">
-                    <Image
+                    <img
                       src={patentImages[activeImageIndex]} 
                       alt={`Patent figure ${activeImageIndex + 1}`}
                       className="object-contain w-full h-full"
@@ -289,7 +289,7 @@ const Movie = ({ result }: { result: SearchResult }) => {
                       onClick={() => setActiveImageIndex(index)}
                       className={`flex-shrink-0 h-16 w-16 rounded-md overflow-hidden border-2 ${activeImageIndex === index ? 'border-[#a02337]' : 'border-transparent'}`}
                     >
-                      <Image
+                      <img
                         src={img} 
                         alt={`Thumbnail ${index + 1}`}
                         className="object-cover w-full h-full"
