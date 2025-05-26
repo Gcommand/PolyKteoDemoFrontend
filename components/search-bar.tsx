@@ -81,7 +81,13 @@ const SearchBar = () => {
           <select
               id="department-select"
               value={selectedDepartment}
-              onChange={(e) => setSelectedDepartment(e.target.value)}
+              onChange={(e) => {
+                setSelectedDepartment(e.target.value);
+                // Only trigger search if there is a query
+                if (query.length > 0) {
+                  searchHandler(Action.SEARCH, sortingOrder, currentPage, pageSize, e.target.value);
+                }
+              }}
               className="px-3 py-1 text-sm rounded-md border border-gray-300 bg-white focus:outline-none focus:border-blue-400 transition-colors"
           >
             <option value="">All Departments</option>
