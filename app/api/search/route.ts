@@ -7,16 +7,22 @@ export async function GET(request: Request) {
   const sortingOrder = searchParams.get("sorting_order") || "REL_DESC";
   const currentPage = searchParams.get("current_page") || "1";
   const pageSize = searchParams.get("page_size") || "10";
+  const department = searchParams.get("department");
 
   if (!query) {
     return NextResponse.json({ error: "No query provided" });
   }
 
+  let baseUrl = `http://localhost:5000/search?query=${encodeURIComponent(query)}&confidence_level=${confidenceLevel}&sorting_order=${sortingOrder}&current_page=${currentPage}&page_size=${pageSize}`;
+  // let baseUrl = `https://poly-kteo-poc-d4c9fkgrbaahe5hg.eastasia-01.azurewebsites.net/search?query=${encodeURIComponent(query)}&confidence_level=${confidenceLevel}&sorting_order=${sortingOrder}&current_page=${currentPage}&page_size=${pageSize}`;
+  if (department) {
+    baseUrl += `&department=${department}`;
+  }
+
   try {
     // Forward the request to the PolyKteo API
     const response = await fetch(
-        // `http://localhost:5000/search?query=${encodeURIComponent(query)}&confidence_level=${confidenceLevel}&sorting_order=${sortingOrder}&current_page=${currentPage}&page_size=${pageSize}`,
-        `https://poly-kteo-poc-d4c9fkgrbaahe5hg.eastasia-01.azurewebsites.net/search?query=${encodeURIComponent(query)}&confidence_level=${confidenceLevel}&sorting_order=${sortingOrder}&current_page=${currentPage}&page_size=${pageSize}`,
+      baseUrl,
       {
         headers: {
           "Content-Type": "application/json",

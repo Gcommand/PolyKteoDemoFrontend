@@ -208,7 +208,7 @@ const Movie = ({ result }: { result: SearchResult }) => {
               <span className="font-medium">Inventor:</span> {result.inventor || 'Unknown'}
             </p>
             <p className="text-sm text-gray-600">
-              <span className="font-medium">Department:</span> {result.department || 'N/A'}
+              <span className="font-medium">Department:</span> {result.departments && result.departments.length > 0 ? result.departments.map(d => d.abbreviation).join(', ') : 'N/A'}
             </p>
             <p className="text-sm text-gray-600">
               <span className="font-medium">Tech Sector:</span> {result.tech_sector || 'N/A'}
@@ -313,7 +313,7 @@ const Movie = ({ result }: { result: SearchResult }) => {
                     <h4 className="text-lg font-semibold mb-2 text-[#a02337]">Patent Information</h4>
                     <div className="bg-gray-50 p-4 rounded-md">
                       <p className="mb-2"><span className="font-medium">Inventor:</span> {patentData?.inventor || 'N/A'}</p>
-                      <p className="mb-2"><span className="font-medium">Department:</span> {patentData?.department || 'N/A'}</p>
+                      <p className="mb-2"><span className="font-medium">Department:</span> {patentData?.departments && patentData.departments.length > 0 ? patentData.departments.map((d: any) => d.abbreviation).join(', ') : 'N/A'}</p>
                       <p className="mb-2"><span className="font-medium">Tech Sector:</span> {patentData?.tech_sector || 'N/A'}</p>
                       <p className="mb-2"><span className="font-medium">Country/Region:</span> {patentData?.country_region || 'N/A'}</p>
                       {patentData?.google_patent_link && (

@@ -1,3 +1,9 @@
+export interface DepartmentInfo {
+  department_id: number;
+  department_name: string;
+  abbreviation: string;
+}
+
 export interface SearchResult {
   title: string;
   description: string;
@@ -15,4 +21,5 @@ export interface SearchResult {
   similarity?: number;
   tech_sector?: string;
   is_tech?: boolean;
+  departments?: DepartmentInfo[];
 }

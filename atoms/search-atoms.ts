@@ -1,5 +1,4 @@
 import { atom } from "jotai";
-import { SearchResult } from "@/types/search";
 
 export enum Action {
   SEARCH = "SEARCH",
@@ -13,11 +12,39 @@ interface PaginationInfo {
   total_pages: number;
 }
 
+export interface DepartmentInfo {
+  department_id: number;
+  department_name: string;
+  abbreviation: string;
+}
+
+export interface SearchResult {
+  title: string;
+  description: string;
+  official_title: string;
+  sys_id: string;
+  query: string;
+  ai_summary: string;
+  ai_short_summary: string;
+  country_region: string;
+  department: string;
+  google_patent_link: string;
+  inventor: string;
+  similarity: number;
+  tech_sector: string;
+  is_tech: boolean;
+  departments?: DepartmentInfo[];
+}
+
 // Search Handler Function
-const searchHandler = async (query: string, confidenceLevel: number = 0.25, sortingOrder: string = "REL_DESC", currentPage: number = 1, pageSize: number = 10) => {
+const searchHandler = async (query: string, confidenceLevel: number = 0.25, sortingOrder: string = "REL_DESC", currentPage: number = 1, pageSize: number = 10, departmentNumber?: string) => {
   try {
     // Use our local API proxy instead of calling the external API directly
-    const res = await fetch(`/api/search?query=${encodeURIComponent(query)}&confidence_level=${confidenceLevel}&sorting_order=${sortingOrder}&current_page=${currentPage}&page_size=${pageSize}`);
+    let url = `/api/search?query=${encodeURIComponent(query)}&confidence_level=${confidenceLevel}&sorting_order=${sortingOrder}&current_page=${currentPage}&page_size=${pageSize}`;
+    if (departmentNumber && departmentNumber !== "") {
+      url += `&department=${departmentNumber}`;
+    }
+    const res = await fetch(url);
     if (!res.ok) {
       throw new Error('Failed to fetch search results');
     }
@@ -26,7 +53,7 @@ const searchHandler = async (query: string, confidenceLevel: number = 0.25, sort
     // Transform the data to match the expected SearchResult format
     const transformedResults = responseData.results.map((item: any) => ({
       title: item.official_title || '',
-      description: `Inventor: ${item.inventor || 'Unknown'} | Department: ${item.department || 'N/A'} | Tech Sector: ${item.tech_sector || 'N/A'}`,
+      description: `Inventor: ${item.inventor || 'Unknown'} | Department: ${item.departments && item.departments.length > 0 ? item.departments.map((d: any) => d.abbreviation).join(', ') : 'N/A'} | Tech Sector: ${item.tech_sector || 'N/A'}`,
       official_title: item.official_title || '',
       sys_id: item.sys_id,
       query: query,
@@ -34,6 +61,7 @@ const searchHandler = async (query: string, confidenceLevel: number = 0.25, sort
       ai_short_summary: item.ai_short_summary || '',
       country_region: item.country_region || '',
       department: item.department || '',
+      departments: item.departments || [],
       google_patent_link: item.google_patent_link || '',
       inventor: item.inventor || '',
       similarity: item.similarity || 0,
@@ -68,8 +96,8 @@ export const queryAtom = atom("", (_get, set, query) => {
   set(queryAtom, query);
 });
 
-// Add a new atom to store the confidence level with a default value of 0.25
-export const confidenceLevelAtom = atom<number>(0.25);
+// Add a new atom to store the confidence level with a default value of 0
+export const confidenceLevelAtom = atom<number>(0);
 
 // Add sorting order atom
 export const sortingOrderAtom = atom<string>("REL_DESC");
@@ -84,7 +112,7 @@ export const paginationAtom = atom<PaginationInfo>({
 
 export const searchAtom = atom(
   (get) => get(searchActiveAtom),
-  async (get, set, action: Action, sortingOrder: string = "REL_DESC", currentPage: number = 1, pageSize: number = 10) => {
+  async (get, set, action: Action, sortingOrder: string = "REL_DESC", currentPage: number = 1, pageSize: number = 10, departmentNumber?: string) => {
     const query = get(queryAtom);
     const confidenceLevel = get(confidenceLevelAtom);
     if (action === Action.SEARCH) {
@@ -92,7 +120,7 @@ export const searchAtom = atom(
         return;
       } else {
         set(searchActiveAtom, true);
-        const { results, pagination } = await searchHandler(query, confidenceLevel, sortingOrder, currentPage, pageSize);
+        const { results, pagination } = await searchHandler(query, confidenceLevel, sortingOrder, currentPage, pageSize, departmentNumber);
         set(moviesAtom, results);
         set(paginationAtom, pagination);
         set(searchActiveAtom, false);

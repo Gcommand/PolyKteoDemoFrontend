@@ -13,16 +13,17 @@ const SearchBar = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const results = useAtomValue(moviesAtom);
+  const [selectedDepartment, setSelectedDepartment] = useState("");
 
   const keyPressHandler = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Enter") {
-        searchHandler(Action.SEARCH, sortingOrder, currentPage, pageSize);
+        searchHandler(Action.SEARCH, sortingOrder, currentPage, pageSize, selectedDepartment);
       } else if (e.key === "Escape") {
         setQuery("");
       }
     },
-    [searchHandler, setQuery, sortingOrder, currentPage, pageSize]
+    [searchHandler, setQuery, sortingOrder, currentPage, pageSize, selectedDepartment]
   );
 
   // Keyboard Event Listener
@@ -66,7 +67,7 @@ const SearchBar = () => {
         ) : (
           <button
             onClick={() => {
-              searchHandler(Action.SEARCH, sortingOrder, 1, pageSize);
+              searchHandler(Action.SEARCH, sortingOrder, 1, pageSize, selectedDepartment);
             }}
             className="search-button inline-block px-3 py-2 text-sm rounded-md transition-colors"
           >
@@ -76,42 +77,52 @@ const SearchBar = () => {
       </div>
 
       <div className="flex items-center w-full mt-2 px-4 py-2 gap-4">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-600">Search Precision:</span>
-          <div className="flex gap-2">
-            <button
-                onClick={() => setConfidenceLevel(0)}
-                className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                    confidenceLevel === 0
-                        ? 'bg-[#a02337] text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-            >
-              Broad
-            </button>
-            <button
-                onClick={() => setConfidenceLevel(0.25)}
-                className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                    confidenceLevel === 0.25
-                        ? 'bg-[#a02337] text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-            >
-              Balanced
-            </button>
-            <button
-                onClick={() => setConfidenceLevel(0.4)}
-                className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                    confidenceLevel === 0.4
-                        ? 'bg-[#a02337] text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-            >
-              Precise
-            </button>
-          </div>
-        </div>
-        <div className="search-sort ml-auto">
+        <div className="search-sort ml-auto flex gap-2 items-center">
+          <select
+              id="department-select"
+              value={selectedDepartment}
+              onChange={(e) => setSelectedDepartment(e.target.value)}
+              className="px-3 py-1 text-sm rounded-md border border-gray-300 bg-white focus:outline-none focus:border-blue-400 transition-colors"
+          >
+            <option value="">All Departments</option>
+            <option value="1">Department of Aeronautical and Aviation Engineering</option>
+            <option value="2">Department of Applied Biology and Chemical Technology</option>
+            <option value="3">Department of Applied Mathematics</option>
+            <option value="4">Department of Applied Physics</option>
+            <option value="5">Department of Applied Social Sciences</option>
+            <option value="6">Department of Biomedical Engineering</option>
+            <option value="7">Department of Building and Real Estate</option>
+            <option value="8">Department of Building Environment and Energy Engineering</option>
+            <option value="9">Department of Chinese and Bilingual Studies</option>
+            <option value="10">Department of Chinese History and Culture</option>
+            <option value="11">Department of Civil and Environmental Engineering</option>
+            <option value="12">Department of Computing</option>
+            <option value="13">Department of Data Science and Artificial Intelligence</option>
+            <option value="14">Department of Electrical and Electronic Engineering</option>
+            <option value="15">Department of Electronic and Information Engineering</option>
+            <option value="16">Department of English and Communication</option>
+            <option value="17">Department of Food Science and Nutrition</option>
+            <option value="18">Department of Health Technology and Informatics</option>
+            <option value="19">Department of Industrial and Systems Engineering</option>
+            <option value="20">Department of Land Surveying and Geo-Informatics</option>
+            <option value="21">Department of Logistics and Maritime Studies</option>
+            <option value="22">Department of Management and Marketing</option>
+            <option value="23">Department of Mechanical Engineering</option>
+            <option value="24">Department of Rehabilitation Sciences</option>
+            <option value="25">School of Accounting and Finance</option>
+            <option value="26">School of Design</option>
+            <option value="27">School of Fashion and Textiles</option>
+            <option value="28">School of Hotel and Tourism Management</option>
+            <option value="29">School of Nursing</option>
+            <option value="30">School of Optometry</option>
+            <option value="31">Graduate School</option>
+            <option value="32">Chinese Language Centre</option>
+            <option value="33">Confucius Institute of Hong Kong</option>
+            <option value="34">English Language Centre</option>
+            <option value="35">Industrial Centre</option>
+            <option value="36">Innovation and Technology Development Office</option>
+            <option value="37">Research Institute of Innovative Products & Technologies</option>
+          </select>
           <select
               id="control-sort"
               value={sortingOrder}
@@ -119,7 +130,7 @@ const SearchBar = () => {
                 setSortingOrder(e.target.value);
                 // Only trigger search if there are existing results
                 if (results.length > 0) {
-                  searchHandler(Action.SEARCH, e.target.value, currentPage, pageSize);
+                  searchHandler(Action.SEARCH, e.target.value, currentPage, pageSize, selectedDepartment);
                 }
               }}
               className="px-3 py-1 text-sm rounded-md border border-gray-300 bg-white focus:outline-none focus:border-blue-400 transition-colors"
