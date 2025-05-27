@@ -6,7 +6,7 @@ export async function GET(request: Request) {
   const confidenceLevel = searchParams.get("confidence_level") || "0.25";
   const sortingOrder = searchParams.get("sorting_order") || "REL_DESC";
   const currentPage = searchParams.get("current_page") || "1";
-  const pageSize = searchParams.get("page_size") || "10";
+  const pageSize = searchParams.get("page_size") || "12";
   const department = searchParams.get("department");
   const techSector = searchParams.get("tech_sector");
 

@@ -42,7 +42,7 @@ const searchHandler = async (
   confidenceLevel: number = 0.25,
   sortingOrder: string = "REL_DESC",
   currentPage: number = 1,
-  pageSize: number = 10,
+  pageSize: number = 12,
   departmentNumber?: string,
   techSector?: string
 ) => {
@@ -116,7 +116,7 @@ export const sortingOrderAtom = atom<string>("REL_DESC");
 // Add pagination atom
 export const paginationAtom = atom<PaginationInfo>({
   current_page: 1,
-  page_size: 10,
+  page_size: 12,
   total_count: 0,
   total_pages: 0
 });
@@ -129,7 +129,7 @@ export const searchAtom = atom(
     action: Action,
     sortingOrder: string = "REL_DESC",
     currentPage: number = 1,
-    pageSize: number = 10,
+    pageSize: number = 12,
     departmentNumber?: string,
     techSector?: string
   ) => {
@@ -150,7 +150,7 @@ export const searchAtom = atom(
       set(moviesAtom, []);
       set(paginationAtom, {
         current_page: 1,
-        page_size: 10,
+        page_size: 12,
         total_count: 0,
         total_pages: 0
       });

@@ -11,7 +11,7 @@ const SearchBar = () => {
   const [confidenceLevel, setConfidenceLevel] = useAtom(confidenceLevelAtom);
   const [sortingOrder, setSortingOrder] = useAtom(sortingOrderAtom);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(12);
   const results = useAtomValue(moviesAtom);
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");

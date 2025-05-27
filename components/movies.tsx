@@ -11,7 +11,7 @@ const Movies = () => {
   const [, searchHandler] = useAtom(searchAtom);
   const sortingOrder = useAtomValue(sortingOrderAtom);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(12);
   
   // Reset current page when new results are received
   useEffect(() => {
