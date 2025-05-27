@@ -9,6 +9,7 @@ export async function GET(request: Request) {
   const pageSize = searchParams.get("page_size") || "12";
   const department = searchParams.get("department");
   const techSector = searchParams.get("tech_sector");
+  const assigneeId = searchParams.get("assignee_id");
 
   if (!query) {
     return NextResponse.json({ error: "No query provided" });
@@ -22,6 +23,9 @@ export async function GET(request: Request) {
   }
   if (techSector) {
     baseUrl += `&tech_sector=${encodeURIComponent(techSector)}`;
+  }
+  if (assigneeId) {
+    baseUrl += `&assignee_id=${assigneeId}`;
   }
 
   try {

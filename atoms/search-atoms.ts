@@ -44,7 +44,8 @@ const searchHandler = async (
   currentPage: number = 1,
   pageSize: number = 12,
   departmentNumber?: string,
-  techSector?: string
+  techSector?: string,
+  assigneeId?: string
 ) => {
   try {
     // Use our local API proxy instead of calling the external API directly
@@ -54,6 +55,9 @@ const searchHandler = async (
     }
     if (techSector && techSector !== "") {
       url += `&tech_sector=${encodeURIComponent(techSector)}`;
+    }
+    if (assigneeId && assigneeId !== "") {
+      url += `&assignee_id=${assigneeId}`;
     }
     const res = await fetch(url);
     if (!res.ok) {
@@ -131,7 +135,8 @@ export const searchAtom = atom(
     currentPage: number = 1,
     pageSize: number = 12,
     departmentNumber?: string,
-    techSector?: string
+    techSector?: string,
+    assigneeId?: string
   ) => {
     const query = get(queryAtom);
     const confidenceLevel = get(confidenceLevelAtom);
@@ -140,7 +145,7 @@ export const searchAtom = atom(
         return;
       } else {
         set(searchActiveAtom, true);
-        const { results, pagination } = await searchHandler(query, confidenceLevel, sortingOrder, currentPage, pageSize, departmentNumber, techSector);
+        const { results, pagination } = await searchHandler(query, confidenceLevel, sortingOrder, currentPage, pageSize, departmentNumber, techSector, assigneeId);
         set(moviesAtom, results);
         set(paginationAtom, pagination);
         set(searchActiveAtom, false);

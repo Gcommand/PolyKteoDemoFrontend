@@ -4,6 +4,12 @@ import { useAtom, useAtomValue } from "jotai";
 import { Search } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
+// Add Assignee type
+type Assignee = {
+  assignee_id: number;
+  assignee_name: string;
+  is_poly: boolean;
+};
 
 const SearchBar = () => {
   const [query, setQuery] = useAtom(queryAtom);
@@ -15,16 +21,19 @@ const SearchBar = () => {
   const results = useAtomValue(moviesAtom);
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [assignees, setAssignees] = useState<Assignee[]>([]);
+  const [selectedAssignee, setSelectedAssignee] = useState("");
+  const [assigneesLoading, setAssigneesLoading] = useState(true);
 
   const keyPressHandler = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Enter") {
-        searchHandler(Action.SEARCH, sortingOrder, currentPage, pageSize, selectedDepartment, selectedCategory);
+        searchHandler(Action.SEARCH, sortingOrder, currentPage, pageSize, selectedDepartment, selectedCategory, selectedAssignee);
       } else if (e.key === "Escape") {
         setQuery("");
       }
     },
-    [searchHandler, setQuery, sortingOrder, currentPage, pageSize, selectedDepartment, selectedCategory]
+    [searchHandler, setQuery, sortingOrder, currentPage, pageSize, selectedDepartment, selectedCategory, selectedAssignee]
   );
 
   // Keyboard Event Listener
@@ -34,6 +43,25 @@ const SearchBar = () => {
       document.removeEventListener("keydown", keyPressHandler);
     };
   }, [keyPressHandler]);
+
+  const backendBaseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:5000";
+  // const backendBaseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "https://poly-kteo-poc-d4c9fkgrbaahe5hg.eastasia-01.azurewebsites.net";
+  // const backendBaseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "https://gary-testing-avh4dya7dygkddhz.southeastasia-01.azurewebsites.net";
+  let baseUrl = `${backendBaseUrl}/search?query=...`;
+
+  useEffect(() => {
+    setAssigneesLoading(true);
+    fetch("/api/poly_assignees")
+      .then(res => res.json())
+      .then(data => setAssignees(data.results))
+      .catch(() => setAssignees([]))
+      .finally(() => setAssigneesLoading(false));
+  }, []);
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    searchHandler(Action.SEARCH, sortingOrder, newPage, pageSize, selectedDepartment, selectedCategory, selectedAssignee);
+  };
 
   return (
     <div className="w-full">
@@ -68,7 +96,7 @@ const SearchBar = () => {
         ) : (
           <button
             onClick={() => {
-              searchHandler(Action.SEARCH, sortingOrder, 1, pageSize, selectedDepartment, selectedCategory);
+              searchHandler(Action.SEARCH, sortingOrder, 1, pageSize, selectedDepartment, selectedCategory, selectedAssignee);
             }}
             className="search-button inline-block px-3 py-2 text-sm rounded-md transition-colors"
           >
@@ -77,31 +105,31 @@ const SearchBar = () => {
         )}
       </div>
 
-      <div className="flex items-center w-full mt-2 px-4 py-2 gap-4">
-        <div className="search-sort ml-auto flex gap-2 items-center w-full">
+      <div className="w-full mt-2 py-2">
+        <div className="flex gap-2 items-center w-full mb-2">
           <select
             id="category-select"
             value={selectedCategory}
             onChange={(e) => {
               setSelectedCategory(e.target.value);
               if (query.length > 0) {
-                searchHandler(Action.SEARCH, sortingOrder, currentPage, pageSize, selectedDepartment, e.target.value);
+                searchHandler(Action.SEARCH, sortingOrder, currentPage, pageSize, selectedDepartment, e.target.value, selectedAssignee);
               }
             }}
             className="flex-1 min-w-0 px-3 py-1 text-sm rounded-md border border-gray-300 bg-white focus:outline-none focus:border-blue-400 transition-colors"
           >
             <option value="">All Categories</option>
-            <option value="Foodtech/Biotech/Pharmaceutical">Foodtech/Biotech/Pharmaceutical</option>
-            <option value="Other">Other</option>
-            <option value="Information and Communications Technology">Information and Communications Technology</option>
-            <option value="Electrical & Manufacturing/Information and Communications Technology">Electrical & Manufacturing/Information and Communications Technology</option>
-            <option value="Healthcare">Healthcare</option>
             <option value="Construction">Construction</option>
-            <option value="Material Science">Material Science</option>
-            <option value="Foodtech/Biotech/Pharmaceutical/Healthcare">Foodtech/Biotech/Pharmaceutical/Healthcare</option>
-            <option value="Electrical & Manufacturing/Foodtech/Biotech/Pharmaceutical">Electrical & Manufacturing/Foodtech/Biotech/Pharmaceutical</option>
             <option value="Electrical & Manufacturing">Electrical & Manufacturing</option>
+            <option value="Electrical & Manufacturing/Foodtech/Biotech/Pharmaceutical">Electrical & Manufacturing/Foodtech/Biotech/Pharmaceutical</option>
+            <option value="Electrical & Manufacturing/Information and Communications Technology">Electrical & Manufacturing/Information and Communications Technology</option>
+            <option value="Foodtech/Biotech/Pharmaceutical">Foodtech/Biotech/Pharmaceutical</option>
+            <option value="Foodtech/Biotech/Pharmaceutical/Healthcare">Foodtech/Biotech/Pharmaceutical/Healthcare</option>
+            <option value="Healthcare">Healthcare</option>
             <option value="Healthcare/Textile">Healthcare/Textile</option>
+            <option value="Information and Communications Technology">Information and Communications Technology</option>
+            <option value="Material Science">Material Science</option>
+            <option value="Other">Other</option>
             <option value="Textile">Textile</option>
           </select>
           <select
@@ -109,9 +137,8 @@ const SearchBar = () => {
             value={selectedDepartment}
             onChange={(e) => {
               setSelectedDepartment(e.target.value);
-              // Only trigger search if there is a query
               if (query.length > 0) {
-                searchHandler(Action.SEARCH, sortingOrder, currentPage, pageSize, e.target.value, selectedCategory);
+                searchHandler(Action.SEARCH, sortingOrder, currentPage, pageSize, e.target.value, selectedCategory, selectedAssignee);
               }
             }}
             className="flex-1 min-w-0 px-3 py-1 text-sm rounded-md border border-gray-300 bg-white focus:outline-none focus:border-blue-400 transition-colors"
@@ -156,16 +183,35 @@ const SearchBar = () => {
             <option value="37">Research Institute of Innovative Products & Technologies</option>
           </select>
           <select
+            id="assignee-select"
+            value={selectedAssignee}
+            onChange={(e) => {
+              setSelectedAssignee(e.target.value);
+              if (query.length > 0) {
+                searchHandler(Action.SEARCH, sortingOrder, currentPage, pageSize, selectedDepartment, selectedCategory, e.target.value);
+              }
+            }}
+            className="flex-1 min-w-0 px-3 py-1 text-sm rounded-md border border-gray-300 bg-white focus:outline-none focus:border-blue-400 transition-colors"
+            disabled={assigneesLoading}
+          >
+            <option value="">All PolyU Assignees</option>
+            {assignees.map((a) => (
+              <option key={a.assignee_id} value={a.assignee_id}>{a.assignee_name}</option>
+            ))}
+          </select>
+        </div>
+        <div className="flex justify-end gap-2">
+          <select
             id="control-sort"
             value={sortingOrder}
             onChange={(e) => {
               setSortingOrder(e.target.value);
-              // Only trigger search if there are existing results
               if (results.length > 0) {
-                searchHandler(Action.SEARCH, e.target.value, currentPage, pageSize, selectedDepartment, selectedCategory);
+                searchHandler(Action.SEARCH, e.target.value, currentPage, pageSize, selectedDepartment, selectedCategory, selectedAssignee);
               }
             }}
             className="flex-1 min-w-0 px-3 py-1 text-sm rounded-md border border-gray-300 bg-white focus:outline-none focus:border-blue-400 transition-colors"
+            style={{ maxWidth: '33%' }}
           >
             <option value="REL_DESC">Sort by Relevance: Descending</option>
             <option value="REL_ASC">Sort by Relevance: Ascending</option>
