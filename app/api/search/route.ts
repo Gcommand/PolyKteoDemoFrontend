@@ -18,14 +18,14 @@ export async function GET(request: Request) {
   // let baseUrl = `http://localhost:5000/search?query=${encodeURIComponent(query)}&confidence_level=${confidenceLevel}&sorting_order=${sortingOrder}&current_page=${currentPage}&page_size=${pageSize}`;
   // let baseUrl = `https://poly-kteo-poc-d4c9fkgrbaahe5hg.eastasia-01.azurewebsites.net/search?query=${encodeURIComponent(query)}&confidence_level=${confidenceLevel}&sorting_order=${sortingOrder}&current_page=${currentPage}&page_size=${pageSize}`;
   let baseUrl = `https://gary-testing-avh4dya7dygkddhz.southeastasia-01.azurewebsites.net/search?query=${encodeURIComponent(query)}&confidence_level=${confidenceLevel}&sorting_order=${sortingOrder}&current_page=${currentPage}&page_size=${pageSize}`;
+  if (assigneeId) {
+    baseUrl += `&assignee_id=${assigneeId}`;
+  }
   if (department) {
     baseUrl += `&department=${department}`;
   }
   if (techSector) {
     baseUrl += `&tech_sector=${encodeURIComponent(techSector)}`;
-  }
-  if (assigneeId) {
-    baseUrl += `&assignee_id=${assigneeId}`;
   }
 
   try {
