@@ -175,9 +175,6 @@ const SearchBar = () => {
             <option value="29">School of Nursing</option>
             <option value="30">School of Optometry</option>
             <option value="31">Graduate School</option>
-            <option value="32">Chinese Language Centre</option>
-            <option value="33">Confucius Institute of Hong Kong</option>
-            <option value="34">English Language Centre</option>
             <option value="35">Industrial Centre</option>
             <option value="36">Innovation and Technology Development Office</option>
             <option value="37">Research Institute of Innovative Products & Technologies</option>
