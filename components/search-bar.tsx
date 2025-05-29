@@ -196,7 +196,11 @@ const SearchBar = () => {
           >
             <option value="">All PolyU Assignees</option>
             {assignees.map((a) => (
-              <option key={a.assignee_id} value={a.assignee_id}>{a.assignee_name}</option>
+              <option key={a.assignee_id} value={a.assignee_id}>
+                {a.assignee_name === "Hong Kong Polytechnic University HKPU"
+                  ? "The Hong Kong Polytechnic University"
+                  : a.assignee_name}
+              </option>
             ))}
           </select>
         </div>
