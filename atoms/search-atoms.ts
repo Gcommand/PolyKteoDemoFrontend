@@ -165,3 +165,8 @@ export const searchAtom = atom(
 
 // Initialize with an empty array of SearchResult
 export const moviesAtom = atom<SearchResult[]>([]);
+
+// Add filter atoms
+export const departmentFilterAtom = atom<string>("");
+export const categoryFilterAtom = atom<string>("");
+export const assigneeFilterAtom = atom<string>("");

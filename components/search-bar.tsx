@@ -1,5 +1,5 @@
 "use client";
-import { Action, queryAtom, searchAtom, confidenceLevelAtom, sortingOrderAtom, moviesAtom } from "@/atoms/search-atoms";
+import { Action, queryAtom, searchAtom, confidenceLevelAtom, sortingOrderAtom, moviesAtom, departmentFilterAtom, categoryFilterAtom, assigneeFilterAtom } from "@/atoms/search-atoms";
 import { useAtom, useAtomValue } from "jotai";
 import { Search } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -19,10 +19,10 @@ const SearchBar = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
   const results = useAtomValue(moviesAtom);
-  const [selectedDepartment, setSelectedDepartment] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useAtom(departmentFilterAtom);
+  const [selectedCategory, setSelectedCategory] = useAtom(categoryFilterAtom);
   const [assignees, setAssignees] = useState<Assignee[]>([]);
-  const [selectedAssignee, setSelectedAssignee] = useState("");
+  const [selectedAssignee, setSelectedAssignee] = useAtom(assigneeFilterAtom);
   const [assigneesLoading, setAssigneesLoading] = useState(true);
 
   const keyPressHandler = useCallback(

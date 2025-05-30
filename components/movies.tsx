@@ -1,5 +1,5 @@
 "use client";
-import { moviesAtom, paginationAtom, searchAtom, Action, sortingOrderAtom } from "@/atoms/search-atoms";
+import { moviesAtom, paginationAtom, searchAtom, Action, sortingOrderAtom, departmentFilterAtom, categoryFilterAtom, assigneeFilterAtom } from "@/atoms/search-atoms";
 import { useAtom, useAtomValue } from "jotai";
 import Movie from "./movie";
 import { SearchResult } from "@/types/search";
@@ -12,6 +12,9 @@ const Movies = () => {
   const sortingOrder = useAtomValue(sortingOrderAtom);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
+  const selectedDepartment = useAtomValue(departmentFilterAtom);
+  const selectedCategory = useAtomValue(categoryFilterAtom);
+  const selectedAssignee = useAtomValue(assigneeFilterAtom);
   
   // Reset current page when new results are received
   useEffect(() => {
@@ -24,7 +27,7 @@ const Movies = () => {
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
-    searchHandler(Action.SEARCH, sortingOrder, newPage, pageSize);
+    searchHandler(Action.SEARCH, sortingOrder, newPage, pageSize, selectedDepartment, selectedCategory, selectedAssignee);
   };
 
   return (
