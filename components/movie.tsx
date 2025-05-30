@@ -118,9 +118,53 @@ const Movie = ({ result }: { result: SearchResult }) => {
   const formatContent = (text: string) => {
     if (!text) return '';
     
+    // console.log('formatContent input text:', text);
+    
     const sections = text.split('\n\n');
-    const formattedSections = sections.map(section => {
+    // console.log('Split sections:', sections);
+    
+    const formattedSections = sections.map((section, index) => {
       if (section.startsWith('####')) {
+        // Special handling for Reference Links section
+        if (section.includes('Reference Links:')) {
+          // console.log('Found Reference Links section:', section);
+          
+          // First try to get links from the current section
+          let lines = section.split('\n');
+          let header = lines[0].replace('####', '').trim();
+          let links = lines.slice(1).filter(line => line.trim());
+          
+          // If no links in current section, try next section
+          if (links.length === 0 && index + 1 < sections.length) {
+            // console.log('No links in current section, checking next section');
+            const nextSection = sections[index + 1];
+            if (nextSection && !nextSection.startsWith('#')) {
+              links = nextSection.split('\n').filter(line => line.trim());
+              // Mark next section as processed
+              sections[index + 1] = '';
+            }
+          }
+          
+          // console.log('Reference Links header:', header);
+          // console.log('Existing links:', links);
+          
+          // If this is a China patent and not a tech, add CNIPA link
+          if (!patentData?.is_tech && patentData?.country_region === 'China') {
+            // console.log('Patent is China and not tech:', { is_tech: patentData?.is_tech, country_region: patentData?.country_region });
+            
+            const nextNumber = links.length + 1;
+            const cnipaLink = `${nextNumber}. [CNIPA Search](https://pss-system.cponline.cnipa.gov.cn/conventionalSearch)`;
+            // console.log('Adding CNIPA link:', cnipaLink);
+            
+            links.push(cnipaLink);
+            // console.log('Updated links with CNIPA:', links);
+          }
+          
+          const formattedSection = `<h4 class="text-lg font-semibold mt-4 mb-2">${header}</h4><p class="my-2">${links.join('\n')}</p>`;
+          // console.log('Formatted Reference Links section:', formattedSection);
+          
+          return formattedSection;
+        }
         return `<h4 class="text-lg font-semibold mt-4 mb-2">${section.replace('####', '')}</h4>`;
       } else if (section.startsWith('###')) {
         return `<h3 class="text-xl font-semibold mt-4 mb-2">${section.replace('###', '')}</h3>`;
@@ -130,12 +174,19 @@ const Movie = ({ result }: { result: SearchResult }) => {
         return `<h1 class="text-3xl font-bold mt-6 mb-4">${section.replace('#', '')}</h1>`;
       } else if (section.includes('- ')) {
         return `<ul class="list-disc pl-5 my-2">${section.split('\n').map(item => `<li>${item.replace('- ', '')}</li>`).join('')}</ul>`;
-      } else {
+      } else if (section.trim()) {  // Only process non-empty sections
         return `<p class="my-2">${section}</p>`;
       }
+      return '';  // Return empty string for empty sections
     });
 
-    return renderLinks(formattedSections.join(''));
+    const joinedSections = formattedSections.join('');
+    // console.log('Joined formatted sections:', joinedSections);
+    
+    const finalResult = renderLinks(joinedSections);
+    // console.log('Final result after renderLinks:', finalResult);
+    
+    return finalResult;
   };
 
   return (
