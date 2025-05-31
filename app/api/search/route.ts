@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   const currentPage = searchParams.get("current_page") || "1";
   const pageSize = searchParams.get("page_size") || "12";
   const department = searchParams.get("department");
-  const techSector = searchParams.get("tech_sector");
+  const techSectorId = searchParams.get("tech_sector_id");
   const assigneeId = searchParams.get("assignee_id");
 
   if (!query) {
@@ -25,8 +25,8 @@ export async function GET(request: Request) {
   if (department) {
     baseUrl += `&department=${department}`;
   }
-  if (techSector) {
-    baseUrl += `&tech_sector=${encodeURIComponent(techSector)}`;
+  if (techSectorId) {
+    baseUrl += `&tech_sector_id=${techSectorId}`;
   }
 
   try {

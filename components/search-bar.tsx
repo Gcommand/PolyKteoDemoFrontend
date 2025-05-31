@@ -11,6 +11,12 @@ type Assignee = {
   is_poly: boolean;
 };
 
+// Add TechSector type
+type TechSector = {
+  tech_sector_id: number;
+  tech_sector_name: string;
+};
+
 const SearchBar = () => {
   const [query, setQuery] = useAtom(queryAtom);
   const [isSearching, searchHandler] = useAtom(searchAtom);
@@ -24,6 +30,8 @@ const SearchBar = () => {
   const [assignees, setAssignees] = useState<Assignee[]>([]);
   const [selectedAssignee, setSelectedAssignee] = useAtom(assigneeFilterAtom);
   const [assigneesLoading, setAssigneesLoading] = useState(true);
+  const [techSectors, setTechSectors] = useState<TechSector[]>([]);
+  const [techSectorsLoading, setTechSectorsLoading] = useState(true);
 
   const keyPressHandler = useCallback(
     (e: KeyboardEvent) => {
@@ -56,6 +64,15 @@ const SearchBar = () => {
       .then(data => setAssignees(data.results))
       .catch(() => setAssignees([]))
       .finally(() => setAssigneesLoading(false));
+  }, []);
+
+  useEffect(() => {
+    setTechSectorsLoading(true);
+    fetch("/api/tech_sectors")
+      .then(res => res.json())
+      .then(data => setTechSectors(data.results))
+      .catch(() => setTechSectors([]))
+      .finally(() => setTechSectorsLoading(false));
   }, []);
 
   const handlePageChange = (newPage: number) => {
@@ -117,20 +134,14 @@ const SearchBar = () => {
               }
             }}
             className="flex-1 min-w-0 px-3 py-1 text-sm rounded-md border border-gray-300 bg-white focus:outline-none focus:border-blue-400 transition-colors"
+            disabled={techSectorsLoading}
           >
             <option value="">All Categories</option>
-            <option value="Construction">Construction</option>
-            <option value="Electrical & Manufacturing">Electrical & Manufacturing</option>
-            <option value="Electrical & Manufacturing/Foodtech/Biotech/Pharmaceutical">Electrical & Manufacturing/Foodtech/Biotech/Pharmaceutical</option>
-            <option value="Electrical & Manufacturing/Information and Communications Technology">Electrical & Manufacturing/Information and Communications Technology</option>
-            <option value="Foodtech/Biotech/Pharmaceutical">Foodtech/Biotech/Pharmaceutical</option>
-            <option value="Foodtech/Biotech/Pharmaceutical/Healthcare">Foodtech/Biotech/Pharmaceutical/Healthcare</option>
-            <option value="Healthcare">Healthcare</option>
-            <option value="Healthcare/Textile">Healthcare/Textile</option>
-            <option value="Information and Communications Technology">Information and Communications Technology</option>
-            <option value="Material Science">Material Science</option>
-            <option value="Other">Other</option>
-            <option value="Textile">Textile</option>
+            {techSectors.map((ts) => (
+              <option key={ts.tech_sector_id} value={ts.tech_sector_id}>
+                {ts.tech_sector_name}
+              </option>
+            ))}
           </select>
           <select
             id="department-select"

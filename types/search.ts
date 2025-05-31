@@ -5,21 +5,20 @@ export interface DepartmentInfo {
 }
 
 export interface SearchResult {
+  sys_id: string;
   title: string;
-  description: string;
-  url?: string;
-  image?: string;
   official_title?: string;
-  sys_id?: number;
-  query?: string;
+  inventor?: string;
+  departments?: Array<{
+    abbreviation: string;
+    name: string;
+  }>;
+  tech_sector_id?: number;
+  is_tech: boolean;
+  country_region?: string;
+  google_patent_link?: string;
+  similarity?: number;
   ai_summary?: string;
   ai_short_summary?: string;
-  country_region?: string;
-  department?: string;
-  google_patent_link?: string;
-  inventor?: string;
-  similarity?: number;
-  tech_sector?: string;
-  is_tech?: boolean;
-  departments?: DepartmentInfo[];
+  query?: string;
 }

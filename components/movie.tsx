@@ -239,11 +239,6 @@ const Movie = ({ result }: { result: SearchResult }) => {
           
           {/* Tags */}
           <div className="flex flex-wrap gap-2 mb-4">
-            {result.tech_sector && (
-              <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
-                {result.tech_sector}
-              </span>
-            )}
             <span className={`px-2 py-1 text-xs font-medium rounded-full ${
               result.is_tech 
                 ? 'bg-blue-100 text-blue-800' 
@@ -260,9 +255,6 @@ const Movie = ({ result }: { result: SearchResult }) => {
             </p>
             <p className="text-sm text-gray-600">
               <span className="font-medium">Department:</span> {result.departments && result.departments.length > 0 ? result.departments.map(d => d.abbreviation).join(', ') : 'N/A'}
-            </p>
-            <p className="text-sm text-gray-600">
-              <span className="font-medium">Tech Sector:</span> {result.tech_sector || 'N/A'}
             </p>
           </div>
 
@@ -365,8 +357,6 @@ const Movie = ({ result }: { result: SearchResult }) => {
                     <div className="bg-gray-50 p-4 rounded-md">
                       <p className="mb-2"><span className="font-medium">Inventor:</span> {patentData?.inventor || 'N/A'}</p>
                       <p className="mb-2"><span className="font-medium">Department:</span> {patentData?.departments && patentData.departments.length > 0 ? patentData.departments.map((d: any) => d.abbreviation).join(', ') : 'N/A'}</p>
-                      <p className="mb-2"><span className="font-medium">Tech Sector:</span> {patentData?.tech_sector || 'N/A'}</p>
-                      <p className="mb-2"><span className="font-medium">Country/Region:</span> {patentData?.country_region || 'N/A'}</p>
                       {patentData?.google_patent_link && (
                         <p className="mb-2">
                           <span className="font-medium">Google Patent:</span>{' '}

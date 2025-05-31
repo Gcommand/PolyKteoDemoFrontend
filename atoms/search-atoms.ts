@@ -31,7 +31,7 @@ export interface SearchResult {
   google_patent_link: string;
   inventor: string;
   similarity: number;
-  tech_sector: string;
+  tech_sector_id: string;
   is_tech: boolean;
   departments?: DepartmentInfo[];
 }
@@ -44,7 +44,7 @@ const searchHandler = async (
   currentPage: number = 1,
   pageSize: number = 12,
   departmentNumber?: string,
-  techSector?: string,
+  techSectorId?: string,
   assigneeId?: string
 ) => {
   try {
@@ -53,8 +53,8 @@ const searchHandler = async (
     if (departmentNumber && departmentNumber !== "") {
       url += `&department=${departmentNumber}`;
     }
-    if (techSector && techSector !== "") {
-      url += `&tech_sector=${encodeURIComponent(techSector)}`;
+    if (techSectorId && techSectorId !== "") {
+      url += `&tech_sector_id=${techSectorId}`;
     }
     if (assigneeId && assigneeId !== "") {
       url += `&assignee_id=${assigneeId}`;
@@ -68,7 +68,7 @@ const searchHandler = async (
     // Transform the data to match the expected SearchResult format
     const transformedResults = responseData.results.map((item: any) => ({
       title: item.official_title || '',
-      description: `Inventor: ${item.inventor || 'Unknown'} | Department: ${item.departments && item.departments.length > 0 ? item.departments.map((d: any) => d.abbreviation).join(', ') : 'N/A'} | Tech Sector: ${item.tech_sector || 'N/A'}`,
+      description: `Inventor: ${item.inventor || 'Unknown'} | Department: ${item.departments && item.departments.length > 0 ? item.departments.map((d: any) => d.abbreviation).join(', ') : 'N/A'} | Tech Sector: ${item.tech_sector_name || 'N/A'}`,
       official_title: item.official_title || '',
       sys_id: item.sys_id,
       query: query,
@@ -80,7 +80,7 @@ const searchHandler = async (
       google_patent_link: item.google_patent_link || '',
       inventor: item.inventor || '',
       similarity: item.similarity || 0,
-      tech_sector: item.tech_sector || '',
+      tech_sector_id: item.tech_sector_id,
       is_tech: item.is_tech || false
     }));
 
@@ -135,7 +135,7 @@ export const searchAtom = atom(
     currentPage: number = 1,
     pageSize: number = 12,
     departmentNumber?: string,
-    techSector?: string,
+    techSectorId?: string,
     assigneeId?: string
   ) => {
     const query = get(queryAtom);
@@ -145,7 +145,7 @@ export const searchAtom = atom(
         return;
       } else {
         set(searchActiveAtom, true);
-        const { results, pagination } = await searchHandler(query, confidenceLevel, sortingOrder, currentPage, pageSize, departmentNumber, techSector, assigneeId);
+        const { results, pagination } = await searchHandler(query, confidenceLevel, sortingOrder, currentPage, pageSize, departmentNumber, techSectorId, assigneeId);
         set(moviesAtom, results);
         set(paginationAtom, pagination);
         set(searchActiveAtom, false);
