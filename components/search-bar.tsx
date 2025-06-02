@@ -1,8 +1,9 @@
 "use client";
-import { Action, queryAtom, searchAtom, confidenceLevelAtom, sortingOrderAtom, moviesAtom, departmentFilterAtom, categoryFilterAtom, assigneeFilterAtom } from "@/atoms/search-atoms";
+import { Action, queryAtom, searchAtom, confidenceLevelAtom, sortingOrderAtom, moviesAtom, departmentFilterAtom, categoryFilterAtom, assigneeFilterAtom, techSectorsAtom, techSectorsLoadingAtom, polyAssigneesAtom, polyAssigneesLoadingAtom, fetchTechSectorsAtom, fetchPolyAssigneesAtom } from "@/atoms/search-atoms";
 import { useAtom, useAtomValue } from "jotai";
 import { Search } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 // Add Assignee type
 type Assignee = {
@@ -27,11 +28,16 @@ const SearchBar = () => {
   const results = useAtomValue(moviesAtom);
   const [selectedDepartment, setSelectedDepartment] = useAtom(departmentFilterAtom);
   const [selectedCategory, setSelectedCategory] = useAtom(categoryFilterAtom);
-  const [assignees, setAssignees] = useState<Assignee[]>([]);
   const [selectedAssignee, setSelectedAssignee] = useAtom(assigneeFilterAtom);
-  const [assigneesLoading, setAssigneesLoading] = useState(true);
-  const [techSectors, setTechSectors] = useState<TechSector[]>([]);
-  const [techSectorsLoading, setTechSectorsLoading] = useState(true);
+  
+  // Use atoms for tech sectors and poly assignees
+  const techSectors = useAtomValue(techSectorsAtom);
+  const techSectorsLoading = useAtomValue(techSectorsLoadingAtom);
+  const polyAssignees = useAtomValue(polyAssigneesAtom);
+  const polyAssigneesLoading = useAtomValue(polyAssigneesLoadingAtom);
+  const [, fetchTechSectors] = useAtom(fetchTechSectorsAtom);
+  const [, fetchPolyAssignees] = useAtom(fetchPolyAssigneesAtom);
+  const router = useRouter();
 
   const keyPressHandler = useCallback(
     (e: KeyboardEvent) => {
@@ -52,37 +58,53 @@ const SearchBar = () => {
     };
   }, [keyPressHandler]);
 
-  const backendBaseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:5000";
-  // const backendBaseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "https://poly-kteo-poc-d4c9fkgrbaahe5hg.eastasia-01.azurewebsites.net";
-  // const backendBaseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "https://gary-testing-avh4dya7dygkddhz.southeastasia-01.azurewebsites.net";
-  let baseUrl = `${backendBaseUrl}/search?query=...`;
-
+  // Fetch tech sectors and poly assignees on component mount
   useEffect(() => {
-    setAssigneesLoading(true);
-    fetch("/api/poly_assignees")
-      .then(res => res.json())
-      .then(data => setAssignees(data.results))
-      .catch(() => setAssignees([]))
-      .finally(() => setAssigneesLoading(false));
-  }, []);
+    let mounted = true;
 
-  useEffect(() => {
-    setTechSectorsLoading(true);
-    fetch("/api/tech_sectors")
-      .then(res => res.json())
-      .then(data => setTechSectors(data.results))
-      .catch(() => setTechSectors([]))
-      .finally(() => setTechSectorsLoading(false));
-  }, []);
+    const fetchData = async () => {
+      try {
+        if (mounted) {
+          await Promise.all([
+            fetchTechSectors(),
+            fetchPolyAssignees()
+          ]);
+        }
+      } catch (error) {
+        console.error('Error fetching initial data:', error);
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      mounted = false;
+    };
+  }, [fetchTechSectors, fetchPolyAssignees]);
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
     searchHandler(Action.SEARCH, sortingOrder, newPage, pageSize, selectedDepartment, selectedCategory, selectedAssignee);
   };
 
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (query.trim()) {
+      await searchHandler(Action.SEARCH);
+    }
+  };
+
+  const handleReset = () => {
+    setQuery("");
+    setSelectedDepartment("");
+    setSelectedCategory("");
+    setSelectedAssignee("");
+    searchHandler(Action.RESET);
+  };
+
   return (
     <div className="w-full">
-      <div className="flex items-center w-full gap-1 px-4 border rounded-md group focus-within:border-blue-400 bg-white focus-within:outline-4 focus-within:outline-blue-200 border-gray-300">
+      <div className="flex items-center w-full gap-1 px-4 border rounded-md group focus-within:border-blue-400 bg-white focus-within:outline-4 focus-within:outline-blue-200 border-gray-300 relative">
         <Search size="16" color="#1e40af" />
         <input
           value={query}
@@ -91,10 +113,10 @@ const SearchBar = () => {
           className="w-full px-4 py-3 bg-transparent rounded-md text-gray-800 group focus:outline-none"
         />
         {isSearching ? (
-          <div role="status">
+          <div role="status" className="absolute right-4">
             <svg
               aria-hidden="true"
-              className="inline w-6 h-6 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+              className="inline w-6 h-6 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
               viewBox="0 0 100 101"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -112,10 +134,9 @@ const SearchBar = () => {
           </div>
         ) : (
           <button
-            onClick={() => {
-              searchHandler(Action.SEARCH, sortingOrder, 1, pageSize, selectedDepartment, selectedCategory, selectedAssignee);
-            }}
-            className="search-button inline-block px-3 py-2 text-sm rounded-md transition-colors"
+            type="submit"
+            disabled={isSearching}
+            className="absolute right-4 px-4 py-2 bg-[#a02337] text-white rounded-md hover:bg-[#8a1d2e] transition-colors disabled:opacity-50"
           >
             Search
           </button>
@@ -137,12 +158,13 @@ const SearchBar = () => {
             disabled={techSectorsLoading}
           >
             <option value="">All Categories</option>
-            {techSectors.map((ts) => (
+            {!techSectorsLoading && techSectors && techSectors.map((ts) => (
               <option key={ts.tech_sector_id} value={ts.tech_sector_id}>
                 {ts.tech_sector_name}
               </option>
             ))}
           </select>
+          
           <select
             id="department-select"
             value={selectedDepartment}
@@ -190,6 +212,7 @@ const SearchBar = () => {
             <option value="36">Innovation and Technology Development Office</option>
             <option value="37">Research Institute of Innovative Products & Technologies</option>
           </select>
+          
           <select
             id="assignee-select"
             value={selectedAssignee}
@@ -200,10 +223,10 @@ const SearchBar = () => {
               }
             }}
             className="flex-1 min-w-0 px-3 py-1 text-sm rounded-md border border-gray-300 bg-white focus:outline-none focus:border-blue-400 transition-colors"
-            disabled={assigneesLoading}
+            disabled={polyAssigneesLoading}
           >
             <option value="">All PolyU Assignees</option>
-            {assignees.map((a) => (
+            {!polyAssigneesLoading && polyAssignees && polyAssignees.map((a) => (
               <option key={a.assignee_id} value={a.assignee_id}>
                 {a.assignee_name === "Hong Kong Polytechnic University HKPU"
                   ? "The Hong Kong Polytechnic University"
@@ -212,27 +235,16 @@ const SearchBar = () => {
             ))}
           </select>
         </div>
-        <div className="flex justify-end gap-2">
-          <select
-            id="control-sort"
-            value={sortingOrder}
-            onChange={(e) => {
-              setSortingOrder(e.target.value);
-              if (results.length > 0) {
-                searchHandler(Action.SEARCH, e.target.value, currentPage, pageSize, selectedDepartment, selectedCategory, selectedAssignee);
-              }
-            }}
-            className="flex-1 min-w-0 px-3 py-1 text-sm rounded-md border border-gray-300 bg-white focus:outline-none focus:border-blue-400 transition-colors"
-            style={{ maxWidth: '33%' }}
-          >
-            <option value="REL_DESC">Sort by Relevance: Descending</option>
-            <option value="REL_ASC">Sort by Relevance: Ascending</option>
-            <option value="FSD_ASC">Sort by Faculties, Schools & Departments: A-Z</option>
-            <option value="FSD_DESC">Sort by Faculties, Schools & Departments: Z-A</option>
-            <option value="DATE_DESC">Sort by Latest date: Latest</option>
-            <option value="DATE_ASC">Sort by Latest date: Oldest</option>
-          </select>
-        </div>
+      </div>
+
+      <div className="flex justify-end mt-4">
+        <button
+          type="button"
+          onClick={handleReset}
+          className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+        >
+          Reset Filters
+        </button>
       </div>
     </div>
   );

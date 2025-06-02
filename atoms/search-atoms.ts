@@ -1,4 +1,20 @@
 import { atom } from "jotai";
+import { apiClient } from "@/utils/api-client";
+
+/**
+ * Architecture Note:
+ * All backend communication should be done through Next.js API routes (/app/api/*) instead of direct backend calls.
+ * This pattern provides several benefits:
+ * 1. Centralizes backend URL configuration
+ * 2. Adds a security layer by not exposing backend URLs to the client
+ * 3. Allows for request/response transformation in one place
+ * 4. Makes it easier to handle errors and add middleware
+ * 
+ * Example API route structure:
+ * /app/api/search/route.ts - Handles search requests
+ * /app/api/tech_sectors/route.ts - Handles tech sectors data
+ * /app/api/poly_assignees/route.ts - Handles poly assignees data
+ */
 
 export enum Action {
   SEARCH = "SEARCH",
@@ -41,7 +57,11 @@ export interface SearchResult {
   }>;
 }
 
-// Search Handler Function
+/**
+ * Search Handler Function
+ * Note: This function uses our local API routes instead of calling the backend directly.
+ * The actual backend communication is handled in the corresponding route.ts files.
+ */
 const searchHandler = async (
   query: string,
   confidenceLevel: number = 0.25,
@@ -53,22 +73,16 @@ const searchHandler = async (
   assigneeId?: string
 ) => {
   try {
-    // Use our local API proxy instead of calling the external API directly
-    let url = `/api/search?query=${encodeURIComponent(query)}&confidence_level=${confidenceLevel}&sorting_order=${sortingOrder}&current_page=${currentPage}&page_size=${pageSize}`;
-    if (departmentNumber && departmentNumber !== "") {
-      url += `&department=${departmentNumber}`;
-    }
-    if (techSectorId && techSectorId !== "") {
-      url += `&tech_sector_id=${techSectorId}`;
-    }
-    if (assigneeId && assigneeId !== "") {
-      url += `&assignee_id=${assigneeId}`;
-    }
-    const res = await fetch(url);
-    if (!res.ok) {
-      throw new Error('Failed to fetch search results');
-    }
-    const responseData = await res.json();
+    const responseData = await apiClient.search({
+      query,
+      confidence_level: confidenceLevel,
+      sorting_order: sortingOrder,
+      current_page: currentPage,
+      page_size: pageSize,
+      department: departmentNumber,
+      tech_sector_id: techSectorId,
+      assignee_id: assigneeId
+    });
     
     // Transform the data to match the expected SearchResult format
     const transformedResults = responseData.results.map((item: any) => ({
@@ -154,7 +168,12 @@ export const searchAtom = atom(
         set(searchActiveAtom, true);
         const { results, pagination } = await searchHandler(query, confidenceLevel, sortingOrder, currentPage, pageSize, departmentNumber, techSectorId, assigneeId);
         set(moviesAtom, results);
-        set(paginationAtom, pagination);
+        set(paginationAtom, pagination || {
+          current_page: 1,
+          page_size: pageSize,
+          total_count: 0,
+          total_pages: 0
+        });
         set(searchActiveAtom, false);
       }
     } else if (action === Action.RESET) {
@@ -177,3 +196,56 @@ export const moviesAtom = atom<SearchResult[]>([]);
 export const departmentFilterAtom = atom<string>("");
 export const categoryFilterAtom = atom<string>("");
 export const assigneeFilterAtom = atom<string>("");
+
+// Add atoms for tech sectors and poly assignees
+export const techSectorsAtom = atom<Array<{ tech_sector_id: number; tech_sector_name: string; }>>([]);
+export const techSectorsLoadingAtom = atom<boolean>(true);
+
+export const polyAssigneesAtom = atom<Array<{ assignee_id: number; assignee_name: string; is_poly: boolean; }>>([]);
+export const polyAssigneesLoadingAtom = atom<boolean>(true);
+
+/**
+ * Data Fetching Functions
+ * These functions use our local API routes to fetch data from the backend.
+ * The actual backend communication is handled in the corresponding route.ts files.
+ */
+const fetchTechSectors = async () => {
+  try {
+    const data = await apiClient.getTechSectors();
+    return data.results;
+  } catch (error) {
+    console.error('Error fetching tech sectors:', error);
+    return [];
+  }
+};
+
+const fetchPolyAssignees = async () => {
+  try {
+    const data = await apiClient.getPolyAssignees();
+    return data.results;
+  } catch (error) {
+    console.error('Error fetching poly assignees:', error);
+    return [];
+  }
+};
+
+// Add atoms for fetching tech sectors and poly assignees
+export const fetchTechSectorsAtom = atom(
+  null,
+  async (get, set) => {
+    set(techSectorsLoadingAtom, true);
+    const techSectors = await fetchTechSectors();
+    set(techSectorsAtom, techSectors);
+    set(techSectorsLoadingAtom, false);
+  }
+);
+
+export const fetchPolyAssigneesAtom = atom(
+  null,
+  async (get, set) => {
+    set(polyAssigneesLoadingAtom, true);
+    const polyAssignees = await fetchPolyAssignees();
+    set(polyAssigneesAtom, polyAssignees);
+    set(polyAssigneesLoadingAtom, false);
+  }
+);

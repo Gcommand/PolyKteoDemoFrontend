@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import { SearchResult } from "@/types/search";
 import { useState, useEffect } from "react";
+import { apiClient } from "@/utils/api-client";
 
 const Movie = ({ result }: { result: SearchResult }) => {
   const [showPopup, setShowPopup] = useState(false);
@@ -37,18 +40,15 @@ const Movie = ({ result }: { result: SearchResult }) => {
   const fetchPatentData = async () => {
     if (!result.ai_summary && result.query) {
       try {
-        const response = await fetch(`/api/search?query=${encodeURIComponent(result.query)}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch patent data');
-        }
-        
-        const data = await response.json();
+        const data = await apiClient.search({
+          query: result.query
+        });
         
         // Find the matching patent data based on the result
-        const matchingPatent = data.find((patent: any) => 
+        const matchingPatent = data.results.find((patent: any) => 
           patent.sys_id === result.sys_id || 
           patent.official_title === result.title
-        ) || data[0]; // Use the first result if no match found
+        ) || data.results[0]; // Use the first result if no match found
         
         if (matchingPatent) {
           return matchingPatent;
