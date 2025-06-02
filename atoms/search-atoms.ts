@@ -31,9 +31,14 @@ export interface SearchResult {
   google_patent_link: string;
   inventor: string;
   similarity: number;
-  tech_sector_id: string;
+  tech_sector_id: number;
   is_tech: boolean;
+  is_cn_applied: boolean;
   departments?: DepartmentInfo[];
+  tech_sectors?: Array<{
+    tech_sector_id: number;
+    tech_sector_name: string;
+  }>;
 }
 
 // Search Handler Function
@@ -68,7 +73,7 @@ const searchHandler = async (
     // Transform the data to match the expected SearchResult format
     const transformedResults = responseData.results.map((item: any) => ({
       title: item.official_title || '',
-      description: `Inventor: ${item.inventor || 'Unknown'} | Department: ${item.departments && item.departments.length > 0 ? item.departments.map((d: any) => d.abbreviation).join(', ') : 'N/A'} | Tech Sector: ${item.tech_sector_name || 'N/A'}`,
+      description: `Inventor: ${item.inventor || 'Unknown'} | Department: ${item.departments && item.departments.length > 0 ? item.departments.map((d: any) => d.abbreviation).join(', ') : 'N/A'} | Tech Sector: ${item.tech_sectors && item.tech_sectors.length > 0 ? item.tech_sectors.map((ts: any) => ts.tech_sector_name).join(', ') : 'N/A'}`,
       official_title: item.official_title || '',
       sys_id: item.sys_id,
       query: query,
@@ -80,8 +85,10 @@ const searchHandler = async (
       google_patent_link: item.google_patent_link || '',
       inventor: item.inventor || '',
       similarity: item.similarity || 0,
-      tech_sector_id: item.tech_sector_id,
-      is_tech: item.is_tech || false
+      tech_sector_id: item.tech_sectors && item.tech_sectors.length > 0 ? item.tech_sectors[0].tech_sector_id : undefined,
+      is_tech: item.is_tech || false,
+      is_cn_applied: item.is_cn_applied || false,
+      tech_sectors: item.tech_sectors || []
     }));
 
     return {

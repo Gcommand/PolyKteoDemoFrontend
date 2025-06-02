@@ -149,7 +149,7 @@ const Movie = ({ result }: { result: SearchResult }) => {
           // console.log('Existing links:', links);
           
           // If this is a China patent and not a tech, add CNIPA link
-          if (!patentData?.is_tech && patentData?.country_region === 'China') {
+          if (!patentData?.is_tech && patentData?.is_cn_applied) {
             // console.log('Patent is China and not tech:', { is_tech: patentData?.is_tech, country_region: patentData?.country_region });
             
             const nextNumber = links.length + 1;
