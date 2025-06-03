@@ -1,5 +1,22 @@
 "use client";
-import { Action, queryAtom, searchAtom, confidenceLevelAtom, sortingOrderAtom, moviesAtom, departmentFilterAtom, categoryFilterAtom, assigneeFilterAtom, techSectorsAtom, techSectorsLoadingAtom, polyAssigneesAtom, polyAssigneesLoadingAtom, fetchTechSectorsAtom, fetchPolyAssigneesAtom } from "@/atoms/search-atoms";
+import { 
+  Action, 
+  queryAtom, 
+  searchAtom, 
+  confidenceLevelAtom, 
+  sortingOrderAtom, 
+  moviesAtom, 
+  departmentFilterAtom, 
+  categoryFilterAtom, 
+  assigneeFilterAtom, 
+  techSectorsAtom, 
+  techSectorsLoadingAtom, 
+  polyAssigneesAtom, 
+  polyAssigneesLoadingAtom, 
+  fetchTechSectorsAtom, 
+  fetchPolyAssigneesAtom,
+  isSearchingAtom 
+} from "@/atoms/search-atoms";
 import { useAtom, useAtomValue } from "jotai";
 import { Search } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -37,9 +54,9 @@ type TechSector = {
 
 const SearchBar = () => {
   const [query, setQuery] = useAtom(queryAtom);
-  const [isSearching, searchHandler] = useAtom(searchAtom);
+  const [, searchHandler] = useAtom(searchAtom);
   const [confidenceLevel, setConfidenceLevel] = useAtom(confidenceLevelAtom);
-  const [sortingOrder, setSortingOrder] = useAtom(sortingOrderAtom);
+  const sortingOrder = useAtomValue(sortingOrderAtom);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
   const results = useAtomValue(moviesAtom);
@@ -54,6 +71,7 @@ const SearchBar = () => {
   const polyAssigneesLoading = useAtomValue(polyAssigneesLoadingAtom);
   const [, fetchTechSectors] = useAtom(fetchTechSectorsAtom);
   const [, fetchPolyAssignees] = useAtom(fetchPolyAssigneesAtom);
+  const isSearching = useAtomValue(isSearchingAtom);
   const router = useRouter();
 
   // Add error states
