@@ -6,11 +6,17 @@ import { useAtomValue } from "jotai";
 import { moviesAtom, sortingOrderAtom, searchAtom } from "@/atoms/search-atoms";
 import { useAtom } from "jotai";
 import { Action } from "@/atoms/search-atoms";
+import { techSectorsLoadingAtom, polyAssigneesLoadingAtom, isSearchingAtom } from "@/atoms/search-atoms";
 
 export default function Home() {
   const results = useAtomValue(moviesAtom);
   const [sortingOrder, setSortingOrder] = useAtom(sortingOrderAtom);
   const [, searchHandler] = useAtom(searchAtom);
+  const techSectorsLoading = useAtomValue(techSectorsLoadingAtom);
+  const polyAssigneesLoading = useAtomValue(polyAssigneesLoadingAtom);
+  const isSearching = useAtomValue(isSearchingAtom);
+
+  const isSearchDisabled = isSearching || techSectorsLoading || polyAssigneesLoading;
 
   return (
     <main>
@@ -39,7 +45,8 @@ export default function Home() {
                   setSortingOrder(e.target.value);
                   searchHandler(Action.SEARCH, e.target.value);
                 }}
-                className="px-3 py-1 text-sm rounded-md border border-gray-300 bg-white focus:outline-none focus:border-blue-400 transition-colors"
+                className={`px-3 py-1 text-sm rounded-md border border-gray-300 bg-white focus:outline-none focus:border-blue-400 transition-colors ${isSearchDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={isSearchDisabled}
               >
                 <option value="REL_DESC">Sort by Relevance: Descending</option>
                 <option value="REL_ASC">Sort by Relevance: Ascending</option>

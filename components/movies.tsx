@@ -1,19 +1,35 @@
 "use client";
-import { moviesAtom, paginationAtom, searchAtom, Action, sortingOrderAtom, departmentFilterAtom, categoryFilterAtom, assigneeFilterAtom } from "@/atoms/search-atoms";
+import { moviesAtom, paginationAtom, searchAtom, Action, sortingOrderAtom, departmentFilterAtom, categoryFilterAtom, assigneeFilterAtom, isSearchingAtom } from "@/atoms/search-atoms";
 import { useAtom, useAtomValue } from "jotai";
 import Movie from "./movie";
 import { SearchResult } from "@/types/search";
 import { useState, useEffect } from "react";
 
+/**
+ * Movies Component
+ * 
+ * IMPORTANT NOTE ON PAGINATION AND FILTERS:
+ * When implementing or modifying search/filter functionality, ensure that:
+ * 1. All selected filters (especially tech_sector_id) are properly passed during page switching
+ * 2. The selectedCategories array from categoryFilterAtom is joined with commas before passing to searchHandler
+ * 3. The same filter format is used consistently across SearchBar and Movies components
+ * 
+ * Common issues to check:
+ * - Verify tech_sector_id parameter is included in the backend call when switching pages
+ * - Ensure selectedCategories is properly joined with commas (selectedCategories.join(','))
+ * - Check that both SearchBar and Movies components use the same atom (categoryFilterAtom)
+ * - Confirm that the filter state is preserved during pagination
+ */
 const Movies = () => {
   const results = useAtomValue(moviesAtom) as unknown as SearchResult[];
   const pagination = useAtomValue(paginationAtom);
   const [, searchHandler] = useAtom(searchAtom);
+  const isSearching = useAtomValue(isSearchingAtom);
   const sortingOrder = useAtomValue(sortingOrderAtom);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
   const selectedDepartment = useAtomValue(departmentFilterAtom);
-  const selectedCategory = useAtomValue(categoryFilterAtom);
+  const selectedCategories = useAtomValue(categoryFilterAtom);
   const selectedAssignee = useAtomValue(assigneeFilterAtom);
   
   // Reset current page when new results are received
@@ -27,7 +43,7 @@ const Movies = () => {
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
-    searchHandler(Action.SEARCH, sortingOrder, newPage, pageSize, selectedDepartment, selectedCategory, selectedAssignee);
+    searchHandler(Action.SEARCH, sortingOrder, newPage, pageSize, selectedDepartment, selectedCategories.join(','), selectedAssignee);
   };
 
   return (
@@ -51,10 +67,40 @@ const Movies = () => {
         <div className="flex justify-center items-center mt-8 gap-4">
           <button
             onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="px-4 py-2 bg-[#a02337] text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#8a1d2e] transition-colors"
+            disabled={currentPage === 1 || isSearching}
+            className={`px-4 py-2 bg-[#a02337] text-white rounded-md transition-colors ${
+              (currentPage === 1 || isSearching) 
+                ? 'opacity-50 cursor-not-allowed' 
+                : 'hover:bg-[#8a1d2e]'
+            }`}
           >
-            Previous
+            {isSearching ? (
+              <div className="flex items-center gap-2">
+                <svg
+                  className="animate-spin h-4 w-4 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                <span>Loading...</span>
+              </div>
+            ) : (
+              'Previous'
+            )}
           </button>
           
           <div className="flex items-center gap-2">
@@ -66,16 +112,72 @@ const Movies = () => {
 
           <button
             onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === pagination.total_pages}
-            className="px-4 py-2 bg-[#a02337] text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#8a1d2e] transition-colors"
+            disabled={currentPage === pagination.total_pages || isSearching}
+            className={`px-4 py-2 bg-[#a02337] text-white rounded-md transition-colors ${
+              (currentPage === pagination.total_pages || isSearching) 
+                ? 'opacity-50 cursor-not-allowed' 
+                : 'hover:bg-[#8a1d2e]'
+            }`}
           >
-            Next
+            {isSearching ? (
+              <div className="flex items-center gap-2">
+                <svg
+                  className="animate-spin h-4 w-4 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                <span>Loading...</span>
+              </div>
+            ) : (
+              'Next'
+            )}
           </button>
         </div>
       )}
 
       <div className="text-center mt-4 text-gray-600">
-        Showing {results.length} of {pagination.total_count} results
+        {isSearching ? (
+          <div className="flex items-center justify-center gap-2">
+            <svg
+              className="animate-spin h-4 w-4 text-gray-600"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
+            </svg>
+            <span>Loading results...</span>
+          </div>
+        ) : (
+          `Showing ${results.length} of ${pagination.total_count} results`
+        )}
       </div>
     </div>
   );

@@ -1,55 +1,44 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const query = searchParams.get("query");
-  const confidenceLevel = searchParams.get("confidence_level") || "0.25";
-  const sortingOrder = searchParams.get("sorting_order") || "REL_DESC";
-  const currentPage = searchParams.get("current_page") || "1";
-  const pageSize = searchParams.get("page_size") || "12";
-  const department = searchParams.get("department");
-  const techSectorId = searchParams.get("tech_sector_id");
-  const assigneeId = searchParams.get("assignee_id");
+// Backend URLs - kept private in route files
+const BACKEND_URLS = {
+  dev: 'http://localhost:5000',
+  staging: 'https://poly-kteo-poc-d4c9fkgrbaahe5hg.eastasia-01.azurewebsites.net',
+  'gary-testing': 'https://gary-testing-avh4dya7dygkddhz.southeastasia-01.azurewebsites.net',
+  'gt-docker-4': 'https://gt-docker-4-e8cveaecfhhxb9eq.southeastasia-01.azurewebsites.net'
+} as const;
 
-  if (!query) {
-    return NextResponse.json({ error: "No query provided" });
-  }
+// Change this to switch environments
+const ACTIVE_ENV: keyof typeof BACKEND_URLS = 'dev';
 
-  // let baseUrl = `http://localhost:5000/search?query=${encodeURIComponent(query)}&confidence_level=${confidenceLevel}&sorting_order=${sortingOrder}&current_page=${currentPage}&page_size=${pageSize}`;
-  // let baseUrl = `https://poly-kteo-poc-d4c9fkgrbaahe5hg.eastasia-01.azurewebsites.net/search?query=${encodeURIComponent(query)}&confidence_level=${confidenceLevel}&sorting_order=${sortingOrder}&current_page=${currentPage}&page_size=${pageSize}`;
-  let baseUrl = `https://gary-testing-avh4dya7dygkddhz.southeastasia-01.azurewebsites.net/search?query=${encodeURIComponent(query)}&confidence_level=${confidenceLevel}&sorting_order=${sortingOrder}&current_page=${currentPage}&page_size=${pageSize}`;
-  // let baseUrl = `https://gt-docker-4-e8cveaecfhhxb9eq.southeastasia-01.azurewebsites.net/search?query=${encodeURIComponent(query)}&confidence_level=${confidenceLevel}&sorting_order=${sortingOrder}&current_page=${currentPage}&page_size=${pageSize}`;
-  if (assigneeId) {
-    baseUrl += `&assignee_id=${assigneeId}`;
-  }
-  if (department) {
-    baseUrl += `&department=${department}`;
-  }
-  if (techSectorId) {
-    baseUrl += `&tech_sector_id=${techSectorId}`;
-  }
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const query = searchParams.get("query") || "";
+  const page = searchParams.get("page") || "1";
+  const pageSize = searchParams.get("pageSize") || "10";
+  const sortingOrder = searchParams.get("sortingOrder") || "REL_DESC";
+  const confidenceLevel = searchParams.get("confidenceLevel") || "0.5";
+  const departmentNumber = searchParams.get("departmentNumber") || "";
+  const techSectorId = searchParams.get("techSectorId") || "";
+  const assigneeId = searchParams.get("assigneeId") || "";
 
   try {
-    // Forward the request to the PolyKteo API
     const response = await fetch(
-      baseUrl,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
+      `${BACKEND_URLS[ACTIVE_ENV]}/search?query=${encodeURIComponent(
+        query
+      )}&page=${page}&pageSize=${pageSize}&sortingOrder=${sortingOrder}&confidenceLevel=${confidenceLevel}&departmentNumber=${departmentNumber}&techSectorId=${techSectorId}&assigneeId=${assigneeId}`
     );
 
     if (!response.ok) {
-      throw new Error(`API responded with status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error fetching from PolyKteo API:", error);
+    console.error("Error fetching data:", error);
     return NextResponse.json(
-      { error: "Failed to fetch data from PolyKteo API" },
+      { error: "Failed to fetch data" },
       { status: 500 }
     );
   }
