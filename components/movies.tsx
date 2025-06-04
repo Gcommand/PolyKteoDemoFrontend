@@ -49,7 +49,7 @@ const Movies = () => {
   return (
     <div className="mt-8">
       <div className="border-t border-neutral-700 my-4"></div>
-      <h2 className="text-xl font-semibold text-neutral-50 mb-4">Search Results</h2>
+      <h2 className="text-xl font-semibold text-black mb-4">Search Results</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {results.map((result: SearchResult, index: number) => (
