@@ -9,6 +9,7 @@ const BACKEND_URLS = {
 } as const;
 
 // Change this to switch environments
+// const ACTIVE_ENV: keyof typeof BACKEND_URLS = 'dev';
 const ACTIVE_ENV: keyof typeof BACKEND_URLS = 'gary-testing';
 
 export async function GET() {

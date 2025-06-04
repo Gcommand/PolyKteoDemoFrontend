@@ -150,7 +150,7 @@ export const isSearchingAtom = atom(false);
 
 export const searchAtom = atom(
   null,
-  async (get, set, action: Action, sortingOrder?: string, currentPage?: number, pageSize?: number, departmentNumber?: string, techSectorId?: string, assigneeId?: string) => {
+  async (get, set, action: Action, sortingOrder?: string, currentPage?: number, pageSize?: number, departmentNumber?: string | string[], techSectorId?: string | string[], assigneeId?: string | string[]) => {
     set(isSearchingAtom, true);
     try {
       const query = get(queryAtom);
@@ -164,9 +164,9 @@ export const searchAtom = atom(
           sortingOrder,
           currentPage,
           pageSize,
-          departmentNumber,
-          techSectorId,
-          assigneeId
+          Array.isArray(departmentNumber) ? departmentNumber.join(',') : departmentNumber,
+          Array.isArray(techSectorId) ? techSectorId.join(',') : techSectorId,
+          Array.isArray(assigneeId) ? assigneeId.join(',') : assigneeId
         );
         set(moviesAtom, results);
         set(paginationAtom, pagination || {
@@ -196,9 +196,9 @@ export const searchAtom = atom(
 export const moviesAtom = atom<SearchResult[]>([]);
 
 // Add filter atoms
-export const departmentFilterAtom = atom<string>("");
+export const departmentFilterAtom = atom<string[]>([]);
 export const categoryFilterAtom = atom<string[]>([]);
-export const assigneeFilterAtom = atom<string>("");
+export const assigneeFilterAtom = atom<string[]>([]);
 
 // Add atoms for tech sectors and poly assignees
 export const techSectorsAtom = atom<Array<{ tech_sector_id: number; tech_sector_name: string; }>>([]);

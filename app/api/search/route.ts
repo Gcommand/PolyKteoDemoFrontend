@@ -9,24 +9,48 @@ const BACKEND_URLS = {
 } as const;
 
 // Change this to switch environments
+// const ACTIVE_ENV: keyof typeof BACKEND_URLS = 'dev';
 const ACTIVE_ENV: keyof typeof BACKEND_URLS = 'gary-testing';
 
+/**
+ * Search API Route
+ * 
+ * Parameter Naming Convention:
+ * - Frontend to API Route: Uses snake_case (e.g., current_page, tech_sector_id)
+ * - API Route to Backend: Uses snake_case (e.g., current_page, tech_sector_id)
+ * 
+ * This ensures consistency in parameter naming across the entire stack.
+ * The backend expects all parameters in snake_case format.
+ */
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const query = searchParams.get("query") || "";
-  const page = searchParams.get("page") || "1";
-  const pageSize = searchParams.get("pageSize") || "10";
-  const sortingOrder = searchParams.get("sortingOrder") || "REL_DESC";
-  const confidenceLevel = searchParams.get("confidenceLevel") || "0.5";
-  const departmentNumber = searchParams.get("departmentNumber") || "";
-  const techSectorId = searchParams.get("techSectorId") || "";
-  const assigneeId = searchParams.get("assigneeId") || "";
+  const current_page = searchParams.get("current_page") || "1";
+  const page_size = searchParams.get("page_size") || "12";
+  const sorting_order = searchParams.get("sorting_order") || "REL_DESC";
+  const confidence_level = searchParams.get("confidence_level") || "0.25";
+  const department = searchParams.get("department") || "";
+  const tech_sector_id = searchParams.get("tech_sector_id") || "";
+  const assignee_id = searchParams.get("assignee_id") || "";
 
   try {
+    // Build URL parameters only for non-empty values
+    // Note: All parameters use snake_case to match backend expectations
+    const params = new URLSearchParams();
+    params.append("query", query);
+    params.append("current_page", current_page);
+    params.append("page_size", page_size);
+    params.append("sorting_order", sorting_order);
+    params.append("confidence_level", confidence_level);
+    
+    // Only append filter parameters if they have meaningful values
+    // Empty strings from joined empty arrays should be treated as "no filter"
+    if (department && department !== "") params.append("department", department);
+    if (tech_sector_id && tech_sector_id !== "") params.append("tech_sector_id", tech_sector_id);
+    if (assignee_id && assignee_id !== "") params.append("assignee_id", assignee_id);
+
     const response = await fetch(
-      `${BACKEND_URLS[ACTIVE_ENV]}/search?query=${encodeURIComponent(
-        query
-      )}&page=${page}&pageSize=${pageSize}&sortingOrder=${sortingOrder}&confidenceLevel=${confidenceLevel}&departmentNumber=${departmentNumber}&techSectorId=${techSectorId}&assigneeId=${assigneeId}`
+      `${BACKEND_URLS[ACTIVE_ENV]}/search?${params.toString()}`
     );
 
     if (!response.ok) {

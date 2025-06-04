@@ -19,7 +19,7 @@ import {
 } from "@/atoms/search-atoms";
 import { useAtom, useAtomValue } from "jotai";
 import { Search } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import MultiSelectDropdown from "./multi-select-dropdown";
 
@@ -50,6 +50,17 @@ type Assignee = {
 type TechSector = {
   tech_sector_id: number;
   tech_sector_name: string;
+};
+
+// Add function to sort tech sectors
+const sortTechSectors = (sectors: TechSector[]) => {
+  return [...sectors].sort((a, b) => {
+    // If either is "Other", handle specially
+    if (a.tech_sector_name.toLowerCase() === "other") return 1;
+    if (b.tech_sector_name.toLowerCase() === "other") return -1;
+    // Otherwise sort alphabetically
+    return a.tech_sector_name.localeCompare(b.tech_sector_name);
+  });
 };
 
 const SearchBar = () => {
@@ -88,6 +99,11 @@ const SearchBar = () => {
 
   // Add a function to check if any search-triggering action is disabled
   const isSearchDisabled = isSearching || isInitialDataLoading;
+
+  // Sort tech sectors when they're loaded
+  const sortedTechSectors = useMemo(() => {
+    return techSectors ? sortTechSectors(techSectors) : [];
+  }, [techSectors]);
 
   const keyPressHandler = useCallback(
     (e: KeyboardEvent) => {
@@ -169,18 +185,48 @@ const SearchBar = () => {
         sortingOrder, 
         currentPage, 
         pageSize, 
-        selectedDepartment, 
+        selectedDepartment.join(','), 
         values.join(','), 
-        selectedAssignee
+        selectedAssignee.join(',')
+      );
+    }
+  };
+
+  const handleDepartmentChange = (values: string[]) => {
+    setSelectedDepartment(values);
+    if (query.length > 0) {
+      searchHandler(
+        Action.SEARCH, 
+        sortingOrder, 
+        currentPage, 
+        pageSize, 
+        values.join(','), 
+        selectedCategories.join(','), 
+        selectedAssignee.join(',')
+      );
+    }
+  };
+
+  const handleAssigneeChange = (values: string[]) => {
+    setSelectedAssignee(values);
+    if (query.length > 0) {
+      searchHandler(
+        Action.SEARCH, 
+        sortingOrder, 
+        currentPage, 
+        pageSize, 
+        selectedDepartment.join(','), 
+        selectedCategories.join(','), 
+        values.join(',')
       );
     }
   };
 
   const handleReset = () => {
     setQuery("");
-    setSelectedDepartment("");
+    setSelectedDepartment([]);
     setSelectedCategories([]);
-    setSelectedAssignee("");
+    setSelectedAssignee([]);
     searchHandler(Action.RESET);
   };
 
@@ -216,55 +262,55 @@ const SearchBar = () => {
 
       <form onSubmit={handleSearch} className="w-full">
         <div className="flex items-center w-full gap-1 px-4 border rounded-md group focus-within:border-blue-400 bg-white focus-within:outline-4 focus-within:outline-blue-200 border-gray-300 relative">
-          <Search size="16" color="#1e40af" />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="What are you looking for..."
+        <Search size="16" color="#1e40af" />
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="What are you looking for..."
             className={`w-full px-4 py-3 bg-transparent rounded-md text-gray-800 group focus:outline-none ${isSearchDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
             disabled={isSearchDisabled}
-          />
-          {isSearching ? (
+        />
+        {isSearching ? (
             <div role="status" className="absolute right-4">
-              <svg
-                aria-hidden="true"
+            <svg
+              aria-hidden="true"
                 className="inline w-6 h-6 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
-                viewBox="0 0 100 101"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                  fill="currentColor"
-                />
-                <path
-                  d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                  fill="currentFill"
-                />
-              </svg>
-              <span className="sr-only">Searching...</span>
-            </div>
-          ) : (
-            <button
+              viewBox="0 0 100 101"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                fill="currentColor"
+              />
+              <path
+                d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                fill="currentFill"
+              />
+            </svg>
+            <span className="sr-only">Searching...</span>
+          </div>
+        ) : (
+          <button
               type="submit"
               onClick={handleSearch}
               disabled={isSearchDisabled}
               className={`absolute right-4 px-4 py-2 bg-[#a02337] text-white rounded-md hover:bg-[#8a1d2e] transition-colors ${isSearchDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              Search
-            </button>
-          )}
-        </div>
+          >
+            Search
+          </button>
+        )}
+      </div>
       </form>
 
       <div className="w-full mt-2 py-2">
         <div className="flex gap-2 items-center w-full mb-2">
           <div className="flex-1 min-w-0">
             <MultiSelectDropdown
-              options={techSectors?.map(ts => ({
+              options={sortedTechSectors.map(ts => ({
                 value: ts.tech_sector_id,
                 label: ts.tech_sector_name
-              })) || []}
+              }))}
               selectedValues={selectedCategories}
               onChange={handleCategoryChange}
               placeholder={
@@ -283,80 +329,69 @@ const SearchBar = () => {
             )}
           </div>
           
-          <select
-            id="department-select"
-            value={selectedDepartment}
-            onChange={(e) => {
-              setSelectedDepartment(e.target.value);
-              if (query.length > 0) {
-                searchHandler(Action.SEARCH, sortingOrder, currentPage, pageSize, e.target.value, selectedCategories.join(','), selectedAssignee);
-              }
-            }}
-            className={`flex-1 min-w-0 px-3 py-1 text-sm rounded-md border border-gray-300 bg-white focus:outline-none focus:border-blue-400 transition-colors ${isSearchDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-            disabled={isSearchDisabled}
-          >
-            <option value="">All Departments</option>
-            <option value="1">Department of Aeronautical and Aviation Engineering</option>
-            <option value="2">Department of Applied Biology and Chemical Technology</option>
-            <option value="3">Department of Applied Mathematics</option>
-            <option value="4">Department of Applied Physics</option>
-            <option value="5">Department of Applied Social Sciences</option>
-            <option value="6">Department of Biomedical Engineering</option>
-            <option value="7">Department of Building and Real Estate</option>
-            <option value="8">Department of Building Environment and Energy Engineering</option>
-            <option value="9">Department of Chinese and Bilingual Studies</option>
-            <option value="10">Department of Chinese Language and Literature</option>
-            <option value="11">Department of Civil and Environmental Engineering</option>
-            <option value="12">Department of Computing</option>
-            <option value="13">Department of Electrical and Electronic Engineering</option>
-            <option value="14">Department of Electronic and Information Engineering</option>
-            <option value="15">Department of English</option>
-            <option value="16">Department of Fashion and Textiles</option>
-            <option value="17">Department of Health Technology and Informatics</option>
-            <option value="18">Department of Industrial and Systems Engineering</option>
-            <option value="19">Department of Information Technology</option>
-            <option value="20">Department of Land Surveying and Geo-Informatics</option>
-            <option value="21">Department of Logistics and Maritime Studies</option>
-            <option value="22">Department of Management and Marketing</option>
-            <option value="23">Department of Mechanical Engineering</option>
-            <option value="24">Department of Optometry and Radiography</option>
-            <option value="25">Department of Rehabilitation Sciences</option>
-            <option value="26">Department of Social Work and Social Administration</option>
-            <option value="27">Department of Translational Medicine</option>
-          </select>
+          <div className="flex-1 min-w-0">
+            <MultiSelectDropdown
+              options={[
+                { value: "1", label: "Department of Aeronautical and Aviation Engineering" },
+                { value: "2", label: "Department of Applied Biology and Chemical Technology" },
+                { value: "3", label: "Department of Applied Mathematics" },
+                { value: "4", label: "Department of Applied Physics" },
+                { value: "5", label: "Department of Applied Social Sciences" },
+                { value: "6", label: "Department of Biomedical Engineering" },
+                { value: "7", label: "Department of Building and Real Estate" },
+                { value: "8", label: "Department of Building Environment and Energy Engineering" },
+                { value: "9", label: "Department of Chinese and Bilingual Studies" },
+                { value: "10", label: "Department of Chinese Language and Literature" },
+                { value: "11", label: "Department of Civil and Environmental Engineering" },
+                { value: "12", label: "Department of Computing" },
+                { value: "13", label: "Department of Electrical and Electronic Engineering" },
+                { value: "14", label: "Department of Electronic and Information Engineering" },
+                { value: "15", label: "Department of English" },
+                { value: "16", label: "Department of Fashion and Textiles" },
+                { value: "17", label: "Department of Health Technology and Informatics" },
+                { value: "18", label: "Department of Industrial and Systems Engineering" },
+                { value: "19", label: "Department of Information Technology" },
+                { value: "20", label: "Department of Land Surveying and Geo-Informatics" },
+                { value: "21", label: "Department of Logistics and Maritime Studies" },
+                { value: "22", label: "Department of Management and Marketing" },
+                { value: "23", label: "Department of Mechanical Engineering" },
+                { value: "24", label: "Department of Optometry and Radiography" },
+                { value: "25", label: "Department of Rehabilitation Sciences" },
+                { value: "26", label: "Department of Social Work and Social Administration" },
+                { value: "27", label: "Department of Translational Medicine" }
+              ]}
+              selectedValues={selectedDepartment}
+              onChange={handleDepartmentChange}
+              placeholder="Select Departments"
+              disabled={isSearchDisabled}
+            />
+          </div>
           
-          <select
-            id="assignee-select"
-            value={selectedAssignee}
-            onChange={(e) => {
-              setSelectedAssignee(e.target.value);
-              if (query.length > 0) {
-                searchHandler(Action.SEARCH, sortingOrder, currentPage, pageSize, selectedDepartment, selectedCategories.join(','), e.target.value);
-              }
-            }}
-            className={`flex-1 min-w-0 px-3 py-1 text-sm rounded-md border border-gray-300 bg-white focus:outline-none focus:border-blue-400 transition-colors ${isSearchDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-            disabled={isSearchDisabled || fetchError.polyAssignees}
-          >
-            <option value="">
-              {polyAssigneesLoading 
-                ? "Loading assignees..." 
-                : fetchError.polyAssignees 
-                  ? "Failed to load assignees" 
-                  : "All PolyU Assignees"}
-            </option>
-            {!polyAssigneesLoading && !fetchError.polyAssignees && polyAssignees && polyAssignees.map((a) => (
-              <option key={a.assignee_id} value={a.assignee_id}>
-                {a.assignee_name === "Hong Kong Polytechnic University HKPU"
+          <div className="flex-1 min-w-0">
+            <MultiSelectDropdown
+              options={polyAssignees?.map(a => ({
+                value: a.assignee_id,
+                label: a.assignee_name === "Hong Kong Polytechnic University HKPU"
                   ? "The Hong Kong Polytechnic University"
-                  : a.assignee_name}
-              </option>
-            ))}
-          </select>
-          {fetchError.polyAssignees && (
-            <p className="text-sm text-red-500 mt-1">
-              Failed to load assignees. Please try refreshing the page.
-            </p>
-          )}
+                  : a.assignee_name
+              })) || []}
+              selectedValues={selectedAssignee}
+              onChange={handleAssigneeChange}
+              placeholder={
+                polyAssigneesLoading 
+                  ? "Loading assignees..." 
+                  : fetchError.polyAssignees 
+                    ? "Failed to load assignees" 
+                    : "Select PolyU Assignees"
+              }
+              disabled={isSearchDisabled || fetchError.polyAssignees}
+            />
+            {fetchError.polyAssignees && (
+              <p className="text-sm text-red-500 mt-1">
+                Failed to load assignees. Please try refreshing the page.
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
