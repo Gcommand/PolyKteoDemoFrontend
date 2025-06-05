@@ -5,12 +5,12 @@ const BACKEND_URLS = {
   dev: 'http://localhost:5000',
   staging: 'https://poly-kteo-poc-d4c9fkgrbaahe5hg.eastasia-01.azurewebsites.net',
   'gary-testing': 'https://gary-testing-avh4dya7dygkddhz.southeastasia-01.azurewebsites.net',
-  'gt-docker-4': 'https://gt-docker-4-e8cveaecfhhxb9eq.southeastasia-01.azurewebsites.net'
+    'gt-container-app2': 'https://gt-container-app2.gentlewater-d7538817.southeastasia.azurecontainerapps.io'
 } as const;
 
 // Change this to switch environments
 // const ACTIVE_ENV: keyof typeof BACKEND_URLS = 'dev';
-const ACTIVE_ENV: keyof typeof BACKEND_URLS = 'gary-testing';
+const ACTIVE_ENV: keyof typeof BACKEND_URLS = 'gt-container-app2';
 
 /**
  * Search API Route
