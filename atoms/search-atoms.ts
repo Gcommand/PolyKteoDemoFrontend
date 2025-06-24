@@ -132,8 +132,8 @@ export const queryAtom = atom("", (_get, set, query) => {
   set(queryAtom, query);
 });
 
-// Add a new atom to store the confidence level with a default value of 0
-export const confidenceLevelAtom = atom<number>(0);
+// Add a new atom to store the confidence level with a default value of 0.25
+export const confidenceLevelAtom = atom<number>(0.25);
 
 // Add sorting order atom
 export const sortingOrderAtom = atom<string>("REL_DESC");

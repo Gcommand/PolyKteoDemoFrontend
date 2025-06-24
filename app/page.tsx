@@ -3,7 +3,7 @@
 import Movies from "@/components/movies";
 import SearchBar from "@/components/search-bar";
 import { useAtomValue } from "jotai";
-import { moviesAtom, sortingOrderAtom, searchAtom } from "@/atoms/search-atoms";
+import { moviesAtom, sortingOrderAtom, searchAtom, departmentFilterAtom, categoryFilterAtom, assigneeFilterAtom } from "@/atoms/search-atoms";
 import { useAtom } from "jotai";
 import { Action } from "@/atoms/search-atoms";
 import { techSectorsLoadingAtom, polyAssigneesLoadingAtom, isSearchingAtom } from "@/atoms/search-atoms";
@@ -15,6 +15,11 @@ export default function Home() {
   const techSectorsLoading = useAtomValue(techSectorsLoadingAtom);
   const polyAssigneesLoading = useAtomValue(polyAssigneesLoadingAtom);
   const isSearching = useAtomValue(isSearchingAtom);
+  
+  // Get current filter values
+  const selectedDepartment = useAtomValue(departmentFilterAtom);
+  const selectedCategories = useAtomValue(categoryFilterAtom);
+  const selectedAssignee = useAtomValue(assigneeFilterAtom);
 
   const isSearchDisabled = isSearching || techSectorsLoading || polyAssigneesLoading;
 
@@ -43,7 +48,15 @@ export default function Home() {
                 value={sortingOrder}
                 onChange={(e) => {
                   setSortingOrder(e.target.value);
-                  searchHandler(Action.SEARCH, e.target.value);
+                  searchHandler(
+                    Action.SEARCH, 
+                    e.target.value, 
+                    1, // currentPage
+                    12, // pageSize
+                    selectedDepartment.join(','),
+                    selectedCategories.join(','),
+                    selectedAssignee.join(',')
+                  );
                 }}
                 className={`px-3 py-1 text-sm rounded-md border border-gray-300 bg-white focus:outline-none focus:border-blue-400 transition-colors ${isSearchDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                 disabled={isSearchDisabled}

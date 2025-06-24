@@ -1,9 +1,11 @@
-import { supabaseClient } from "@/lib/supabase/supabase-client";
+import { getSupabaseClient } from "@/lib/supabase/supabase-client";
 import { MovieType } from "@/movies";
 import { NextResponse } from "next/server";
 import { Configuration, OpenAIApi } from "openai";
+
 const configuration = new Configuration({ apiKey: process.env.OPENAI_API_KEY });
 const openAi = new OpenAIApi(configuration);
+
 export async function POST(request: Request) {
   const movie = (await request.json()) as MovieType;
 
@@ -16,6 +18,15 @@ export async function POST(request: Request) {
   const [{ embedding }] = embeddingResponse.data.data;
 
   // Insert Into Supabase
+  const supabaseClient = getSupabaseClient();
+  
+  if (!supabaseClient) {
+    return NextResponse.json(
+      { error: "Supabase is not configured. Please check environment variables." },
+      { status: 500 }
+    );
+  }
+
   const { error } = await supabaseClient.from("movies").insert({
     ...movie,
     embedding,

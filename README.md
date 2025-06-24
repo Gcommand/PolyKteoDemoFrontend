@@ -20,6 +20,66 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
+## Environment Variables
+
+This application requires the following environment variables:
+
+```bash
+# Supabase Configuration (optional - app will work without these)
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+
+# OpenAI Configuration (optional - app will work without this)
+OPENAI_API_KEY=your_openai_api_key_here
+```
+
+**Note:** The application is designed to work without Supabase and OpenAI configuration. If these environment variables are not set, the related functionality will be disabled gracefully.
+
+## Docker Deployment
+
+### Building the Docker Image
+
+```bash
+docker build -t polykteo-frontend .
+```
+
+### Running the Container
+
+```bash
+# Basic run
+docker run -p 3000:3000 polykteo-frontend
+
+# With environment variables
+docker run -p 3000:3000 \
+  -e NEXT_PUBLIC_SUPABASE_URL=your_supabase_url \
+  -e NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key \
+  -e OPENAI_API_KEY=your_openai_api_key \
+  polykteo-frontend
+```
+
+### Using Docker Compose
+
+Create a `docker-compose.yml` file:
+
+```yaml
+version: '3.8'
+services:
+  frontend:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+```
+
+Then run:
+
+```bash
+docker-compose up -d
+```
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
