@@ -54,6 +54,9 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Also copy static files to the public directory for the standalone server
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./public/_next/static
+
 # Copy custom server.js for better logging
 COPY --chown=nextjs:nodejs server.js ./
 
@@ -65,5 +68,5 @@ ENV PORT 3000
 # set hostname to localhost
 ENV HOSTNAME "0.0.0.0"
 
-# Use custom server.js for better logging
+# Use standard Next.js server
 CMD ["node", "server.js"] 
