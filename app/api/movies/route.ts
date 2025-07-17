@@ -3,7 +3,9 @@ import { MovieType } from "@/movies";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
-const openAi = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openAi = new OpenAI({ 
+  apiKey: process.env.OPENAI_API_KEY || 'dummy-key-for-build' 
+});
 
 export async function POST(request: Request) {
   const movie = (await request.json()) as MovieType;

@@ -37,6 +37,37 @@ console.info = function(...args) {
   flushLogs();
 };
 
+// Security: Function to validate URL paths and reject control characters
+function validateUrlPath(url) {
+  // Skip validation for Next.js static assets to prevent blocking legitimate resources
+  if (url && (url.startsWith('/_next/static') || url.startsWith('/_next/image'))) {
+    return true;
+  }
+  
+  // Check for control characters (0x00-0x1F and 0x7F)
+  // These characters should not appear in valid URL paths
+  const controlCharPattern = /[\x00-\x1F\x7F]/;
+  
+  if (controlCharPattern.test(url)) {
+    return false;
+  }
+  
+  // Additional security checks can be added here
+  // For example, checking for suspicious patterns or encoding
+  
+  return true;
+}
+
+// Security: Send appropriate error response for invalid URLs
+function sendSecurityErrorResponse(res, requestId, reason) {
+  console.warn(`[${requestId}] [SECURITY] Blocked request: ${reason}`);
+  res.writeHead(400, {
+    'Content-Type': 'text/plain',
+    'X-Security-Error': 'Invalid URL path'
+  });
+  res.end('Bad Request: Invalid URL path');
+}
+
 process.env.NODE_ENV = 'production'
 process.chdir(__dirname)
 
@@ -56,6 +87,12 @@ const server = http.createServer(async (req, res) => {
   try {
     // Log incoming requests for debugging
     console.log(`[${requestId}] [SERVER] ${new Date().toISOString()} - ${req.method} ${req.url}`)
+    
+    // Security: Validate URL path before processing
+    if (!validateUrlPath(req.url)) {
+      sendSecurityErrorResponse(res, requestId, `Control characters detected in URL: ${req.url}`);
+      return;
+    }
     
     // Add request logging to capture API route execution
     if (req.url && req.url.startsWith('/api/')) {
