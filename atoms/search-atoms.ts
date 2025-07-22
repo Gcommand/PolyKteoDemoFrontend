@@ -126,9 +126,8 @@ const searchHandler = async (
 const searchActiveAtom = atom(false);
 
 export const queryAtom = atom("", (_get, set, query) => {
-  if (query === "") {
-    set(searchAtom, Action.RESET);
-  }
+  // Remove auto-reset on empty query to allow empty searches
+  // Only reset if explicitly requested
   set(queryAtom, query);
 });
 
@@ -156,7 +155,8 @@ export const searchAtom = atom(
       const query = get(queryAtom);
       const confidenceLevel = get(confidenceLevelAtom);
       
-      if (action === Action.SEARCH && query.length > 0) {
+      // Remove query.length > 0 condition to allow empty searches
+      if (action === Action.SEARCH) {
         set(searchActiveAtom, true);
         const { results, pagination } = await searchHandler(
           query,

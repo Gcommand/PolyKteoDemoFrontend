@@ -37,7 +37,8 @@ export const apiClient = {
     try {
       const searchParams = new URLSearchParams();
       Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== '') {
+        // Allow empty query parameter to be sent for browse-all functionality
+        if (value !== undefined && (key === 'query' || value !== '')) {
           searchParams.append(key, value.toString());
         }
       });

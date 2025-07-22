@@ -7,6 +7,7 @@ import { moviesAtom, sortingOrderAtom, searchAtom, departmentFilterAtom, categor
 import { useAtom } from "jotai";
 import { Action } from "@/atoms/search-atoms";
 import { techSectorsLoadingAtom, polyAssigneesLoadingAtom, isSearchingAtom } from "@/atoms/search-atoms";
+import { useEffect } from "react";
 
 export default function Home() {
   const results = useAtomValue(moviesAtom);
@@ -23,6 +24,15 @@ export default function Home() {
 
   const isSearchDisabled = isSearching || techSectorsLoading || polyAssigneesLoading;
 
+  // Load initial data when page mounts for browse-all functionality
+  useEffect(() => {
+    // Only load if we don't have any results yet and filters are loaded
+    if (results.length === 0 && !techSectorsLoading && !polyAssigneesLoading && !isSearching) {
+      // Perform an empty search to load initial data with latest date sorting
+      searchHandler(Action.SEARCH, "DATE_DESC", 1, 12, [], [], []);
+    }
+  }, [results.length, techSectorsLoading, polyAssigneesLoading, isSearching, searchHandler]);
+
   return (
     <main>
       {/* Main Content Container */}
@@ -30,7 +40,7 @@ export default function Home() {
         <div className="mt-6 mb-8">
           <h2 className="page-title">Find Patents & Technologies</h2>
           <p className="page-subtitle">
-            Enter your search query below to find relevant patents and technologies.
+            Search patents and technologies by keyword, or browse all available content using the filters below.
           </p>
         </div>
         
@@ -41,7 +51,7 @@ export default function Home() {
         {/* Results List */}
         <div className="mt-8">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold text-[#a02337]">Latest Tech</h3>
+            <h3 className="text-xl font-semibold text-[#a02337]">Patents & Technologies</h3>
             {results.length > 0 && (
               <select
                 id="control-sort"

@@ -108,6 +108,7 @@ const SearchBar = () => {
   const keyPressHandler = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Enter") {
+        // Allow empty search on Enter key
         searchHandler(Action.SEARCH, sortingOrder, currentPage, pageSize, selectedDepartment, selectedCategories.join(','), selectedAssignee);
       } else if (e.key === "Escape") {
         setQuery("");
@@ -172,54 +173,50 @@ const SearchBar = () => {
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (query.trim()) {
-      await searchHandler(Action.SEARCH, sortingOrder, currentPage, pageSize, selectedDepartment, selectedCategories.join(','), selectedAssignee);
-    }
+    // Remove query.trim() check to allow empty searches
+    await searchHandler(Action.SEARCH, sortingOrder, currentPage, pageSize, selectedDepartment, selectedCategories.join(','), selectedAssignee);
   };
 
   const handleCategoryChange = (values: string[]) => {
     setSelectedCategories(values);
-    if (query.length > 0) {
-      searchHandler(
-        Action.SEARCH, 
-        sortingOrder, 
-        currentPage, 
-        pageSize, 
-        selectedDepartment.join(','), 
-        values.join(','), 
-        selectedAssignee.join(',')
-      );
-    }
+    // Remove query.length > 0 check to allow filter-only searches
+    searchHandler(
+      Action.SEARCH, 
+      sortingOrder, 
+      currentPage, 
+      pageSize, 
+      selectedDepartment.join(','), 
+      values.join(','), 
+      selectedAssignee.join(',')
+    );
   };
 
   const handleDepartmentChange = (values: string[]) => {
     setSelectedDepartment(values);
-    if (query.length > 0) {
-      searchHandler(
-        Action.SEARCH, 
-        sortingOrder, 
-        currentPage, 
-        pageSize, 
-        values.join(','), 
-        selectedCategories.join(','), 
-        selectedAssignee.join(',')
-      );
-    }
+    // Remove query.length > 0 check to allow filter-only searches
+    searchHandler(
+      Action.SEARCH, 
+      sortingOrder, 
+      currentPage, 
+      pageSize, 
+      values.join(','), 
+      selectedCategories.join(','), 
+      selectedAssignee.join(',')
+    );
   };
 
   const handleAssigneeChange = (values: string[]) => {
     setSelectedAssignee(values);
-    if (query.length > 0) {
-      searchHandler(
-        Action.SEARCH, 
-        sortingOrder, 
-        currentPage, 
-        pageSize, 
-        selectedDepartment.join(','), 
-        selectedCategories.join(','), 
-        values.join(',')
-      );
-    }
+    // Remove query.length > 0 check to allow filter-only searches
+    searchHandler(
+      Action.SEARCH, 
+      sortingOrder, 
+      currentPage, 
+      pageSize, 
+      selectedDepartment.join(','), 
+      selectedCategories.join(','), 
+      values.join(',')
+    );
   };
 
   const handleReset = () => {
@@ -266,7 +263,7 @@ const SearchBar = () => {
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="What are you looking for..."
+          placeholder="Search patents and technologies, or leave blank to browse all..."
             className={`w-full px-4 py-3 bg-transparent rounded-md text-gray-800 group focus:outline-none ${isSearchDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
             disabled={isSearchDisabled}
         />
@@ -304,6 +301,18 @@ const SearchBar = () => {
       </form>
 
       <div className="w-full mt-2 py-2">
+        {/* Add browse indicator */}
+        {query === "" && (selectedCategories.length > 0 || selectedDepartment.length > 0 || selectedAssignee.length > 0) && (
+          <div className="mb-2 text-sm text-blue-600 bg-blue-50 px-3 py-2 rounded-md border border-blue-200">
+            <span className="font-medium">🔍 Browsing with filters applied</span>
+          </div>
+        )}
+        {query === "" && selectedCategories.length === 0 && selectedDepartment.length === 0 && selectedAssignee.length === 0 && results.length > 0 && (
+          <div className="mb-2 text-sm text-green-600 bg-green-50 px-3 py-2 rounded-md border border-green-200">
+            <span className="font-medium">📖 Browsing all available content</span>
+          </div>
+        )}
+        
         <div className="flex gap-2 items-center w-full mb-2">
           <div className="flex-1 min-w-0">
             <MultiSelectDropdown
