@@ -7,7 +7,7 @@ import { moviesAtom, sortingOrderAtom, searchAtom, departmentFilterAtom, categor
 import { useAtom } from "jotai";
 import { Action } from "@/atoms/search-atoms";
 import { techSectorsLoadingAtom, polyAssigneesLoadingAtom, isSearchingAtom } from "@/atoms/search-atoms";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const results = useAtomValue(moviesAtom);
@@ -22,16 +22,20 @@ export default function Home() {
   const selectedCategories = useAtomValue(categoryFilterAtom);
   const selectedAssignee = useAtomValue(assigneeFilterAtom);
 
+  // Add state to track if initial load has been attempted
+  const [initialLoadAttempted, setInitialLoadAttempted] = useState(false);
+
   const isSearchDisabled = isSearching || techSectorsLoading || polyAssigneesLoading;
 
   // Load initial data when page mounts for browse-all functionality
   useEffect(() => {
-    // Only load if we don't have any results yet and filters are loaded
-    if (results.length === 0 && !techSectorsLoading && !polyAssigneesLoading && !isSearching) {
+    // Only load if we haven't attempted initial load yet and filters are loaded
+    if (!initialLoadAttempted && !techSectorsLoading && !polyAssigneesLoading && !isSearching) {
       // Perform an empty search to load initial data with latest date sorting
       searchHandler(Action.SEARCH, "DATE_DESC", 1, 12, [], [], []);
+      setInitialLoadAttempted(true);
     }
-  }, [results.length, techSectorsLoading, polyAssigneesLoading, isSearching, searchHandler]);
+  }, [initialLoadAttempted, techSectorsLoading, polyAssigneesLoading, isSearching, searchHandler]);
 
   return (
     <main>
