@@ -179,44 +179,17 @@ const SearchBar = () => {
 
   const handleCategoryChange = (values: string[]) => {
     setSelectedCategories(values);
-    // Remove query.length > 0 check to allow filter-only searches
-    searchHandler(
-      Action.SEARCH, 
-      sortingOrder, 
-      currentPage, 
-      pageSize, 
-      selectedDepartment.join(','), 
-      values.join(','), 
-      selectedAssignee.join(',')
-    );
+    // Remove automatic search trigger - users must click Search button
   };
 
   const handleDepartmentChange = (values: string[]) => {
     setSelectedDepartment(values);
-    // Remove query.length > 0 check to allow filter-only searches
-    searchHandler(
-      Action.SEARCH, 
-      sortingOrder, 
-      currentPage, 
-      pageSize, 
-      values.join(','), 
-      selectedCategories.join(','), 
-      selectedAssignee.join(',')
-    );
+    // Remove automatic search trigger - users must click Search button
   };
 
   const handleAssigneeChange = (values: string[]) => {
     setSelectedAssignee(values);
-    // Remove query.length > 0 check to allow filter-only searches
-    searchHandler(
-      Action.SEARCH, 
-      sortingOrder, 
-      currentPage, 
-      pageSize, 
-      selectedDepartment.join(','), 
-      selectedCategories.join(','), 
-      values.join(',')
-    );
+    // Remove automatic search trigger - users must click Search button
   };
 
   const handleReset = () => {
