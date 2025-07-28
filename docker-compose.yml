@@ -17,8 +17,12 @@ services:
       # Next.js Configuration
       - NODE_ENV=production
       - NEXT_TELEMETRY_DISABLED=1
+      # Logging Configuration (optional)
+      - ENABLE_FILE_LOGGING=${ENABLE_FILE_LOGGING:-true}
+      - LOG_DIR=${LOG_DIR:-/app/logs}
     volumes:
       # Optional: Mount logs directory for debugging
+      # Enable this if you set ENABLE_FILE_LOGGING=true
       - ./logs:/app/logs
     restart: unless-stopped
     healthcheck:

@@ -1,6 +1,25 @@
 const NextServer = require('next/dist/server/next-server').default
 const http = require('http')
 const path = require('path')
+const fs = require('fs')
+
+// Optional file logging setup
+const ENABLE_FILE_LOGGING = process.env.ENABLE_FILE_LOGGING === 'true';
+const LOG_DIR = process.env.LOG_DIR || './logs';
+let logStream = null;
+let errorStream = null;
+
+if (ENABLE_FILE_LOGGING) {
+  // Ensure log directory exists
+  if (!fs.existsSync(LOG_DIR)) {
+    fs.mkdirSync(LOG_DIR, { recursive: true });
+  }
+  
+  // Create log streams with rotation by date
+  const today = new Date().toISOString().split('T')[0];
+  logStream = fs.createWriteStream(path.join(LOG_DIR, `app-${today}.log`), { flags: 'a' });
+  errorStream = fs.createWriteStream(path.join(LOG_DIR, `error-${today}.log`), { flags: 'a' });
+}
 
 // Ensure logs are flushed immediately
 const originalLog = console.log;
@@ -15,27 +34,74 @@ function flushLogs() {
   if (process.stderr.write) {
     process.stderr.write('');
   }
+  if (logStream) {
+    logStream.write('');
+  }
+  if (errorStream) {
+    errorStream.write('');
+  }
+}
+
+function formatLogEntry(level, args) {
+  const timestamp = new Date().toISOString();
+  const message = args.map(arg => 
+    typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+  ).join(' ');
+  return `[${timestamp}] [${level}] ${message}\n`;
 }
 
 console.log = function(...args) {
   originalLog.apply(console, args);
+  if (logStream) {
+    logStream.write(formatLogEntry('INFO', args));
+  }
   flushLogs();
 };
 
 console.error = function(...args) {
   originalError.apply(console, args);
+  if (errorStream) {
+    errorStream.write(formatLogEntry('ERROR', args));
+  }
+  if (logStream) {
+    logStream.write(formatLogEntry('ERROR', args));
+  }
   flushLogs();
 };
 
 console.warn = function(...args) {
   originalWarn.apply(console, args);
+  if (logStream) {
+    logStream.write(formatLogEntry('WARN', args));
+  }
   flushLogs();
 };
 
 console.info = function(...args) {
   originalInfo.apply(console, args);
+  if (logStream) {
+    logStream.write(formatLogEntry('INFO', args));
+  }
   flushLogs();
 };
+
+// Graceful cleanup
+process.on('exit', () => {
+  if (logStream) logStream.end();
+  if (errorStream) errorStream.end();
+});
+
+process.on('SIGTERM', () => {
+  if (logStream) logStream.end();
+  if (errorStream) errorStream.end();
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  if (logStream) logStream.end();
+  if (errorStream) errorStream.end();
+  process.exit(0);
+});
 
 // Simplified URL validation for security
 function validateUrlPath(url) {
