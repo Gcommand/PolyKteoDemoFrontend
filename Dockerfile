@@ -40,8 +40,15 @@ ENV NEXT_TELEMETRY_DISABLED 1
 # Ensure logs are properly flushed
 ENV PYTHONUNBUFFERED=1
 
+# Logging configuration defaults
+ENV ENABLE_FILE_LOGGING=true
+ENV LOG_DIR=/app/logs
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
+
+# Create logs directory with proper permissions
+RUN mkdir -p /app/logs && chown nextjs:nodejs /app/logs
 
 COPY --from=builder /app/public ./public
 
