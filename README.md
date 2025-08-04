@@ -1,8 +1,51 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# PolyKteo Demo Frontend
 
-## Getting Started
+A modern web application for semantic search of patents and technologies from The Hong Kong Polytechnic University. Built with Next.js 15, this application provides intelligent search capabilities with advanced filtering and AI-powered assistance.
 
-First, run the development server:
+## 🚀 Features
+
+- **Semantic Search**: Advanced search functionality for patents and technologies using AI-powered semantic matching
+- **Intelligent Filtering**: Filter results by departments, technology sectors, and assignees
+- **AI Chatbot**: Integrated Dify chatbot for interactive assistance and queries
+- **Real-time Results**: Dynamic search with sorting by relevance, date, and department
+- **Responsive Design**: Modern, mobile-friendly interface built with Tailwind CSS
+- **Browse & Discovery**: Browse all available content with pagination and sorting options
+
+## 🛠️ Tech Stack
+
+- **Frontend Framework**: Next.js 15.2.5 with TypeScript
+- **State Management**: Jotai for atomic state management
+- **Styling**: Tailwind CSS with custom design system
+- **UI Components**: Custom components with Lucide React icons
+- **AI Integration**: Dify chatbot for intelligent assistance
+- **Deployment**: Docker containerization support
+
+## 📋 Prerequisites
+
+- Node.js 18 or higher
+- npm, yarn, or pnpm package manager
+- Docker (for deployment)
+
+## 🔧 Getting Started
+
+### 1. Clone the Repository
+
+```bash
+git clone <repository-url>
+cd PolyKteoDemoFrontend
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
+
+### 3. Run the Development Server
 
 ```bash
 npm run dev
@@ -12,30 +55,54 @@ yarn dev
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🔍 Application Features
 
-[http://localhost:3000/api/hello](http://localhost:3000/api/hello) is an endpoint that uses [Route Handlers](https://beta.nextjs.org/docs/routing/route-handlers). This endpoint can be edited in `app/api/hello/route.ts`.
+### Search Functionality
+- **Keyword Search**: Search patents and technologies by title, description, or keywords
+- **Semantic Matching**: AI-powered search that understands context and meaning
+- **Confidence Levels**: Adjustable confidence thresholds for search results
+- **Advanced Sorting**: Sort by relevance, date, or department (A-Z or Z-A)
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+### Filtering Options
+- **Departments**: Filter by university faculties, schools, and departments
+- **Technology Sectors**: Filter by specific technology categories
+- **Assignees**: Filter by patent assignees and inventors
 
-## Environment Variables
+### AI Assistant
+- **Dify Chatbot**: Integrated AI chatbot for questions and assistance
+- **Custom Styling**: PolyU-branded chatbot interface
+- **Real-time Help**: Interactive support for using the application
 
-This application requires the following environment variables:
+## 🏗️ Project Structure
 
-```bash
-# Supabase Configuration (optional - app will work without these)
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
-
-# OpenAI Configuration (optional - app will work without this)
-OPENAI_API_KEY=your_openai_api_key_here
+```
+PolyKteoDemoFrontend/
+├── app/                    # Next.js App Router
+│   ├── api/               # API routes
+│   │   ├── search/        # Search endpoint
+│   │   ├── tech_sectors/  # Technology sectors API
+│   │   └── poly_assignees/# Assignees API
+│   ├── add/               # Additional pages
+│   ├── globals.css        # Global styles
+│   ├── layout.tsx         # Root layout
+│   ├── page.tsx           # Home page
+│   └── providers.tsx      # State providers
+├── atoms/                 # Jotai atoms for state management
+├── components/            # Reusable React components
+│   ├── DifyChatbot.tsx   # AI chatbot integration
+│   ├── movies.tsx        # Search results display
+│   ├── search-bar.tsx    # Search interface
+│   └── multi-select-dropdown.tsx
+├── config/               # Configuration files
+├── lib/                  # Utility libraries
+├── types/                # TypeScript type definitions
+├── utils/                # Helper functions
+└── sql/                  # Database scripts
 ```
 
-**Note:** The application is designed to work without Supabase and OpenAI configuration. If these environment variables are not set, the related functionality will be disabled gracefully.
-
-## Docker Deployment
+## 🐳 Docker Deployment
 
 ### Building the Docker Image
 
@@ -46,51 +113,112 @@ docker build -t polykteo-frontend .
 ### Running the Container
 
 ```bash
-# Basic run
 docker run -p 3000:3000 polykteo-frontend
-
-# With environment variables
-docker run -p 3000:3000 \
-  -e NEXT_PUBLIC_SUPABASE_URL=your_supabase_url \
-  -e NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key \
-  -e OPENAI_API_KEY=your_openai_api_key \
-  polykteo-frontend
 ```
 
 ### Using Docker Compose
 
-Create a `docker-compose.yml` file:
-
-```yaml
-version: '3.8'
-services:
-  frontend:
-    build: .
-    ports:
-      - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
-      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-```
-
-Then run:
+The project includes a `docker-compose.yml` file for easy deployment:
 
 ```bash
 docker-compose up -d
 ```
 
-## Learn More
+### Production Deployment (UAT & PROD)
 
-To learn more about Next.js, take a look at the following resources:
+For UAT and Production environments, deployment is handled through PolyU's on-premise infrastructure:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+#### 1. Build and Save Docker Image
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+```bash
+# Build the Docker image
+docker build -t polykteo-frontend:latest .
 
-## Deploy on Vercel
+# Save the Docker image as a tar file
+docker save polykteo-frontend:latest -o polykteo-frontend.tar
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+#### 2. Upload to PolyU On-Premise Server
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+```bash
+# Connect via GlobalConnect VPN to PolyU network
+# Upload the tar file to PolyU's Ubuntu server using hostname
+scp polykteo-frontend.tar hostname:/path/to/deployment/
+```
+
+#### 3. Load and Run on PolyU Server
+
+```bash
+# SSH into PolyU Ubuntu server via GlobalConnect VPN using hostname
+ssh hostname
+
+# Load the Docker image from tar file
+docker load -i /path/to/deployment/polykteo-frontend.tar
+
+# Run the container
+docker run -d -p 3000:3000 --name polykteo-frontend polykteo-frontend:latest
+```
+
+#### Deployment Process Summary
+- **Local Development**: Standard Docker development workflow
+- **UAT/PROD**: Docker tar file creation → Upload to PolyU on-premise Ubuntu server → Load and run
+
+This approach ensures secure deployment to PolyU's controlled on-premise infrastructure while maintaining consistency across environments.
+
+## 🔌 API Integration
+
+The application connects to a backend API for search functionality. The API endpoints are configured in:
+
+- **Development**: `http://localhost:5000`
+- **Staging**: Azure Container Apps deployment
+- **Production**: Configurable backend URLs
+
+### Backend Configuration
+
+Backend URLs are managed in the API route files (`app/api/*/route.ts`) with environment-specific configurations.
+
+## 🎨 Customization
+
+### Styling
+- The application uses Tailwind CSS with a custom design system
+- PolyU brand colors and styling are implemented throughout
+- Custom CSS for the Dify chatbot integration
+
+### Components
+- Modular component architecture for easy customization
+- Atomic state management with Jotai for predictable updates
+- TypeScript interfaces for type safety
+
+## 📚 Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is part of The Hong Kong Polytechnic University's research and development initiatives.
+
+## 🔗 Related Resources
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Jotai State Management](https://jotai.org/)
+- [Dify AI Platform](https://dify.ai/)
+
+## 📞 Support
+
+For technical support or questions about this application, please contact the development team or open an issue in this repository.
+
+---
+
+**Built with ❤️ for The Hong Kong Polytechnic University**
