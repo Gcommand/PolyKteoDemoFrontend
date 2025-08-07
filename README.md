@@ -4,12 +4,50 @@ A modern web application for semantic search of patents and technologies from Th
 
 ## 🚀 Features
 
-- **Semantic Search**: Advanced search functionality for patents and technologies using AI-powered semantic matching
-- **Intelligent Filtering**: Filter results by departments, technology sectors, and assignees
-- **AI Chatbot**: Integrated Dify chatbot for interactive assistance and queries
-- **Real-time Results**: Dynamic search with sorting by relevance, date, and department
-- **Responsive Design**: Modern, mobile-friendly interface built with Tailwind CSS
-- **Browse & Discovery**: Browse all available content with pagination and sorting options
+### 📊 **Comprehensive Data Pipeline & Processing**
+- **Large-Scale Patent Database**: Successfully imported and processed over **2,000 patent records** (expanded from initial 900) from The Hong Kong Polytechnic University
+- **Automated Data Pipeline**: Sophisticated n8n workflow automation for continuous data ingestion, processing, and quality assurance
+- **Multi-Source Data Integration**: 
+  - Patent data extraction and standardization
+  - PolyU technology website parsing and content extraction
+  - Google Patents integration for enhanced metadata and imagery
+- **AI-Enhanced Data Processing**: Automated AI summary generation with quality assurance agents for each patent record
+- **Advanced Data Validation**: Built-in quality control mechanisms ensuring data integrity and completeness
+
+### 🔍 **Intelligent Search & Discovery**
+- **Semantic Vector Search**: Advanced AI-powered search using embeddings for contextual understanding beyond keyword matching
+- **Multi-Dimensional Filtering**: 
+  - **Department-based filtering**: Search across PolyU faculties, schools, and departments
+  - **Technology sector categorization**: Precise filtering by technical domains and industries
+  - **Assignee & inventor filtering**: Find patents by specific researchers and patent holders
+- **Confidence-Based Results**: Adjustable similarity thresholds (0.25 default) for precision control
+- **Advanced Sorting Options**: Sort by relevance, date, department (A-Z/Z-A), with pagination support
+
+### 🤖 **AI-Powered Enhancement**
+- **Integrated AI Assistant**: Dify chatbot with PolyU branding for interactive patent exploration and assistance
+- **Automated Content Generation**: 
+  - AI-generated summaries for improved readability
+  - Short summaries for quick overview
+  - Quality assurance validation for content accuracy
+- **Embedding Generation**: Vector embeddings for each patent enabling semantic similarity matching
+- **Multi-Model AI Processing**: Integration with OpenRouter for diverse AI model capabilities
+
+### 🏗️ **Robust Technical Architecture**
+- **Scalable Backend Integration**: Multi-environment deployment (Development, Staging, Production) with Catomind owned Azure Container Apps
+- **Real-time API Performance**: Optimized search APIs with request tracking and performance monitoring
+- **Database Integration**: PostgreSQL with vector storage capabilities for semantic search + Supabase
+- **Responsive Frontend**: Modern Next.js 15 application with TypeScript and atomic state management
+- **Enterprise Deployment**: Docker containerization with PolyU on-premise infrastructure support
+
+### 📈 **Data Management Excellence**
+- **Metadata Enrichment**: Enhanced patent records with:
+  - AI-generated summaries and descriptions
+  - Image URLs and visual assets from Google Patents
+  - Departmental mappings and technology sector classifications
+  - Inventor and assignee standardization
+- **Duplicate Prevention**: Intelligent record validation preventing data duplication
+- **Content Parser**: Custom parsers for PolyU technology websites ensuring comprehensive data coverage
+- **Incremental Updates**: Support for ongoing data updates and new patent additions
 
 ## 🛠️ Tech Stack
 
