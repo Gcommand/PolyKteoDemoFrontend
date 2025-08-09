@@ -8,8 +8,8 @@ import Image from "next/image";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "PolyKteo Demo",
-  description: "PolyKteo Demo Frontend",
+  title: "AI Search Platform",
+  description: "AI Search Platform Frontend",
 };
 
 export default function RootLayout({
@@ -31,7 +31,7 @@ export default function RootLayout({
               {/*    priority*/}
               {/*    unoptimized={true}*/}
               {/*/>*/}
-              <h1 className="text-3xl font-bold text-white">Knowledge Search</h1>
+              <h1 className="text-3xl font-bold text-white">AI Search Platform</h1>
             </div>
             <div className="logo-right">
               <Image 

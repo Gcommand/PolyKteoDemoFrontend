@@ -64,6 +64,12 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Copy public files for standalone mode
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
+# Copy our logging wrapper (this will capture console output and write to files)
+COPY --from=builder --chown=nextjs:nodejs /app/logging-wrapper.js ./logging-wrapper.js
+
+# NOTE: Do NOT copy custom server.js - let Next.js use its generated one
+# COPY --from=builder --chown=nextjs:nodejs /app/server.js ./server.js
+
 USER nextjs
 
 EXPOSE 3000
@@ -72,5 +78,5 @@ ENV PORT 3000
 # set hostname to localhost
 ENV HOSTNAME "0.0.0.0"
 
-# Use the default Next.js server from standalone build
-CMD ["node", "server.js"] 
+# Use our logging wrapper which will start the Next.js server with file logging
+CMD ["node", "logging-wrapper.js"] 

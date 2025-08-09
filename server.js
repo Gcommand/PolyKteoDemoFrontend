@@ -138,6 +138,9 @@ function validateUrlPath(url) {
   return !controlCharPattern.test(url);
 }
 
+// ORIGINAL NEXT.JS STANDALONE PATTERN (with logging wrapper)
+const dir = path.join(__dirname)
+
 process.env.NODE_ENV = 'production'
 process.chdir(__dirname)
 
@@ -147,92 +150,97 @@ if (!process.env.NEXT_MANUAL_SIG_HANDLE) {
   process.on('SIGINT', () => process.exit(0))
 }
 
-let handler
+const currentPort = parseInt(process.env.PORT, 10) || 3000
+const hostname = process.env.HOSTNAME || '0.0.0.0'
 
-const server = http.createServer(async (req, res) => {
-  const requestId = Math.random().toString(36).substring(7);
-  const startTime = Date.now();
-  
-  // Extract client information
-  const clientIP = req.headers['x-forwarded-for'] || 
-                   req.headers['x-real-ip'] || 
-                   req.connection.remoteAddress || 
-                   req.socket.remoteAddress ||
-                   'unknown';
-  const userAgent = req.headers['user-agent'] || 'unknown';
-  const referrer = req.headers['referer'] || '-';
-  
-  // Override res.end to capture response details
-  const originalEnd = res.end;
-  let responseSize = 0;
-  
-  res.end = function(chunk, encoding) {
-    if (chunk) {
-      responseSize += Buffer.isBuffer(chunk) ? chunk.length : Buffer.byteLength(chunk, encoding);
-    }
+console.log(`[SERVER] Starting Next.js server...`)
+
+// Create logging wrapper function
+function withLogging(originalHandler) {
+  return async (req, res) => {
+    const requestId = Math.random().toString(36).substring(7);
+    const startTime = Date.now();
     
-    const endTime = Date.now();
-    const duration = endTime - startTime;
+    // Extract client information for logging
+    const clientIP = req.headers['x-forwarded-for'] || 
+                     req.headers['x-real-ip'] || 
+                     req.connection.remoteAddress || 
+                     req.socket.remoteAddress ||
+                     'unknown';
+    const userAgent = req.headers['user-agent'] || 'unknown';
+    const referrer = req.headers['referer'] || '-';
     
-    // Standard access log format
-    const accessLog = `${clientIP} - - [${new Date().toISOString()}] "${req.method} ${req.url} HTTP/${req.httpVersion}" ${res.statusCode} ${responseSize} "${referrer}" "${userAgent}" ${duration}ms [${requestId}]`;
+    // Override res.end to capture response details for access logging
+    const originalEnd = res.end;
+    let responseSize = 0;
     
-    // Log to access log (if file logging enabled, this will also go to file)
-    console.log(`[ACCESS] ${accessLog}`);
+    res.end = function(chunk, encoding) {
+      if (chunk) {
+        responseSize += Buffer.isBuffer(chunk) ? chunk.length : Buffer.byteLength(chunk, encoding);
+      }
+      
+      const endTime = Date.now();
+      const duration = endTime - startTime;
+      
+      // Standard access log format
+      const accessLog = `${clientIP} - - [${new Date().toISOString()}] "${req.method} ${req.url} HTTP/${req.httpVersion}" ${res.statusCode} ${responseSize} "${referrer}" "${userAgent}" ${duration}ms [${requestId}]`;
+      
+      // Log to access log (if file logging enabled, this will also go to file)
+      console.log(`[ACCESS] ${accessLog}`);
+      
+      return originalEnd.call(this, chunk, encoding);
+    };
     
-    return originalEnd.call(this, chunk, encoding);
-  };
-  
-  try {
-    // Basic request logging (less verbose for static files)
-    if (req.url && !req.url.startsWith('/_next/static')) {
-      console.log(`[${requestId}] ${req.method} ${req.url} from ${clientIP}`)
-    }
-    
-    // Security validation
-    if (!validateUrlPath(req.url)) {
-      console.warn(`[${requestId}] [SECURITY] Blocked request: ${req.url} from ${clientIP}`);
-      res.writeHead(400, { 'Content-Type': 'text/plain' });
-      res.end('Bad Request');
-      return;
-    }
-    
-    // Enhanced logging for API routes only
-    if (req.url && req.url.startsWith('/api/')) {
-      console.log(`[${requestId}] [API] ${req.url} from ${clientIP}`)
-    }
-    
-    await handler(req, res)
-  } catch (err) {
-    console.error(`[${requestId}] [ERROR] ${err.message}`, err);
-    if (!res.headersSent) {
-      res.statusCode = 500
-      res.end('Internal Server Error')
+    try {
+      // Basic request logging (less verbose for static files)
+      if (req.url && !req.url.startsWith('/_next/static')) {
+        console.log(`[${requestId}] ${req.method} ${req.url} from ${clientIP}`)
+      }
+      
+      // Security validation
+      if (!validateUrlPath(req.url)) {
+        console.warn(`[${requestId}] [SECURITY] Blocked request: ${req.url} from ${clientIP}`);
+        res.writeHead(400, { 'Content-Type': 'text/plain' });
+        res.end('Bad Request');
+        return;
+      }
+      
+      // Enhanced logging for API routes
+      if (req.url && req.url.startsWith('/api/')) {
+        console.log(`[${requestId}] [API] ${req.url} from ${clientIP}`)
+      }
+      
+      // Call the original Next.js handler
+      await originalHandler(req, res)
+      
+    } catch (err) {
+      console.error(`[${requestId}] [ERROR] ${err.message}`, err);
+      if (!res.headersSent) {
+        res.statusCode = 500
+        res.end('Internal Server Error')
+      }
     }
   }
+}
+
+// Use the standard Next.js standalone approach
+const nextServer = new NextServer({
+  hostname,
+  port: currentPort,
+  dir,
+  dev: false,
+  customServer: false,
 })
 
-const currentPort = parseInt(process.env.PORT, 10) || 3000
-const hostname = process.env.HOSTNAME || 'localhost'
+// Wrap the Next.js handler with our logging
+const handler = withLogging(nextServer.getRequestHandler())
+
+const server = http.createServer(handler)
 
 server.listen(currentPort, (err) => {
   if (err) {
     console.error("Failed to start server", err)
     process.exit(1)
   }
-  
-  console.log(`[SERVER] Starting Next.js server...`)
-  
-  // Use the default Next.js server configuration
-  const nextServer = new NextServer({
-    hostname,
-    port: currentPort,
-    dir: path.join(__dirname),
-    dev: false,
-    customServer: false,
-  })
-  
-  handler = nextServer.getRequestHandler()
-
   console.log(`[SERVER] Listening on port ${currentPort}, url: http://${hostname}:${currentPort}`)
 }) 
