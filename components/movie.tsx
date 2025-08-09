@@ -123,6 +123,16 @@ const Movie = ({ result }: { result: SearchResult }) => {
     const sections = text.split('\n\n');
     // console.log('Split sections:', sections);
     
+    // Helper to detect bullet-list sections: all non-empty lines start with "- "
+    const isBulletList = (sectionText: string): boolean => {
+      const lines = sectionText
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+      if (lines.length === 0) return false;
+      return lines.every(line => line.startsWith('- '));
+    };
+
     const formattedSections = sections.map((section, index) => {
       if (section.startsWith('####')) {
         // Special handling for Reference Links section
@@ -172,8 +182,15 @@ const Movie = ({ result }: { result: SearchResult }) => {
         return `<h2 class="text-2xl font-bold mt-6 mb-3">${section.replace('##', '')}</h2>`;
       } else if (section.startsWith('#')) {
         return `<h1 class="text-3xl font-bold mt-6 mb-4">${section.replace('#', '')}</h1>`;
-      } else if (section.includes('- ')) {
-        return `<ul class="list-disc pl-5 my-2">${section.split('\n').map(item => `<li>${item.replace('- ', '')}</li>`).join('')}</ul>`;
+      } else if (isBulletList(section)) {
+        const items = section
+          .split('\n')
+          .map(line => line.trim())
+          .filter(line => line.length > 0)
+          .map(line => line.replace(/^\s*-\s+/, '').trim())
+          .filter(item => item.length > 0);
+
+        return `<ul class="list-disc pl-5 my-2">${items.map(item => `<li>${item}</li>`).join('')}</ul>`;
       } else if (section.trim()) {  // Only process non-empty sections
         return `<p class="my-2">${section}</p>`;
       }
