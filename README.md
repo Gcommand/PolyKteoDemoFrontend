@@ -24,7 +24,6 @@ A modern web application for semantic search of patents and technologies from Th
 - **Advanced Sorting Options**: Sort by relevance, date, department (A-Z/Z-A), with pagination support
 
 ### 🤖 **AI-Powered Enhancement**
-- **Integrated AI Assistant**: Dify chatbot with PolyU branding for interactive patent exploration and assistance
 - **Automated Content Generation**: 
   - AI-generated summaries for improved readability
   - Short summaries for quick overview
