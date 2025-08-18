@@ -54,7 +54,7 @@ A modern web application for semantic search of patents and technologies from Th
 - **State Management**: Jotai for atomic state management
 - **Styling**: Tailwind CSS with custom design system
 - **UI Components**: Custom components with Lucide React icons
-- **AI Integration**: Dify chatbot for intelligent assistance
+
 - **Deployment**: Docker containerization support
 
 ## 📋 Prerequisites
@@ -107,10 +107,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - **Technology Sectors**: Filter by specific technology categories
 - **Assignees**: Filter by patent assignees and inventors
 
-### AI Assistant
-- **Dify Chatbot**: Integrated AI chatbot for questions and assistance
-- **Custom Styling**: PolyU-branded chatbot interface
-- **Real-time Help**: Interactive support for using the application
+
 
 ## 🏗️ Project Structure
 
@@ -128,7 +125,6 @@ PolyKteoDemoFrontend/
 │   └── providers.tsx      # State providers
 ├── atoms/                 # Jotai atoms for state management
 ├── components/            # Reusable React components
-│   ├── DifyChatbot.tsx   # AI chatbot integration
 │   ├── movies.tsx        # Search results display
 │   ├── search-bar.tsx    # Search interface
 │   └── multi-select-dropdown.tsx
@@ -219,7 +215,7 @@ Backend URLs are managed in the API route files (`app/api/*/route.ts`) with envi
 ### Styling
 - The application uses Tailwind CSS with a custom design system
 - PolyU brand colors and styling are implemented throughout
-- Custom CSS for the Dify chatbot integration
+
 
 ### Components
 - Modular component architecture for easy customization
@@ -250,7 +246,7 @@ This project is part of The Hong Kong Polytechnic University's research and deve
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Tailwind CSS](https://tailwindcss.com/)
 - [Jotai State Management](https://jotai.org/)
-- [Dify AI Platform](https://dify.ai/)
+
 
 ## 📞 Support
 
