@@ -150,7 +150,9 @@ const Movie = ({ result }: { result: SearchResult }) => {
       if (isAfterSummary) {
         if (trimmed) {
           // Strip leading bullet markers to avoid oversized typography
-          const normalized = trimmed.replace(/^[-*]\s+/gm, '');
+          const normalized = trimmed
+            .replace(/^[-*]\s+/gm, '')
+            .replace(/^#{1,6}\s*/gm, '');
           return `<p class="my-2">${normalized}</p>`;
         }
         return '';
