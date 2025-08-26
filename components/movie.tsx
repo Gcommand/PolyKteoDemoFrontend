@@ -133,7 +133,29 @@ const Movie = ({ result }: { result: SearchResult }) => {
       return lines.every(line => line.startsWith('- '));
     };
 
+    // From the first "Summary:" onward, force all content to simple paragraphs
+    let isAfterSummary = false;
+
     const formattedSections = sections.map((section, index) => {
+      const trimmed = section.trim();
+
+      // Detect a Summary marker, regardless of heading level
+      const isSummaryMarker = /^summary:\s*$/i.test(trimmed) || /^#{1,6}\s*summary:\s*$/i.test(trimmed);
+      if (isSummaryMarker) {
+        isAfterSummary = true;
+        return `<p class="my-2">Summary:</p>`;
+      }
+
+      // After Summary, render everything as regular paragraphs only
+      if (isAfterSummary) {
+        if (trimmed) {
+          // Strip leading bullet markers to avoid oversized typography
+          const normalized = trimmed.replace(/^[-*]\s+/gm, '');
+          return `<p class="my-2">${normalized}</p>`;
+        }
+        return '';
+      }
+
       if (section.startsWith('####')) {
         // Special handling for Reference Links section
         if (section.includes('Reference Links:')) {
@@ -307,59 +329,7 @@ const Movie = ({ result }: { result: SearchResult }) => {
               </button>
             </div>
             
-            {/* Patent Images Gallery */}
-            {!isLoading && patentImages.length > 0 && (
-              <div className="mb-6">
-                <h4 className="text-lg font-semibold mb-3 text-[#a02337]">Patent Figures</h4>
-                <div className="relative">
-                  <div className="relative h-[400px] w-full bg-gray-100 rounded-lg overflow-hidden mb-2">
-                    <img
-                      src={patentImages[activeImageIndex]} 
-                      alt={`Patent figure ${activeImageIndex + 1}`}
-                      className="object-contain w-full h-full"
-                    />
-                  </div>
-                  
-                  {/* Navigation arrows */}
-                  {patentImages.length > 1 && (
-                    <>
-                      <button 
-                        onClick={() => setActiveImageIndex(prev => (prev === 0 ? patentImages.length - 1 : prev - 1))}
-                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-[#a02337] bg-opacity-70 text-white p-2 rounded-full hover:bg-opacity-90"
-                        aria-label="Previous image"
-                      >
-                        ←
-                      </button>
-                      <button 
-                        onClick={() => setActiveImageIndex(prev => (prev === patentImages.length - 1 ? 0 : prev + 1))}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#a02337] bg-opacity-70 text-white p-2 rounded-full hover:bg-opacity-90"
-                        aria-label="Next image"
-                      >
-                        →
-                      </button>
-                    </>
-                  )}
-                </div>
-                
-                {/* Thumbnails */}
-                <div className="flex space-x-2 overflow-x-auto pb-2">
-                  {patentImages.map((img, index) => (
-                    <button 
-                      key={index}
-                      onClick={() => setActiveImageIndex(index)}
-                      className={`flex-shrink-0 h-16 w-16 rounded-md overflow-hidden border-2 ${activeImageIndex === index ? 'border-[#a02337]' : 'border-transparent'}`}
-                    >
-                      <img
-                        src={img} 
-                        alt={`Thumbnail ${index + 1}`}
-                        className="object-cover w-full h-full"
-                      />
-                    </button>
-                  ))}
-                </div>
-                <p className="text-sm text-gray-600 mt-1">Figure {activeImageIndex + 1} of {patentImages.length}</p>
-              </div>
-            )}
+            
             
             {/* Patent Details */}
             {isLoading ? (
@@ -412,6 +382,60 @@ const Movie = ({ result }: { result: SearchResult }) => {
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Patent Images Gallery - moved to bottom */}
+            {!isLoading && patentImages.length > 0 && (
+              <div className="mt-6">
+                <h4 className="text-lg font-semibold mb-3 text-[#a02337]">Patent Figures</h4>
+                <div className="relative">
+                  <div className="relative h-[400px] w-full bg-gray-100 rounded-lg overflow-hidden mb-2">
+                    <img
+                      src={patentImages[activeImageIndex]}
+                      alt={`Patent figure ${activeImageIndex + 1}`}
+                      className="object-contain w-full h-full"
+                    />
+                  </div>
+
+                  {/* Navigation arrows */}
+                  {patentImages.length > 1 && (
+                    <>
+                      <button
+                        onClick={() => setActiveImageIndex(prev => (prev === 0 ? patentImages.length - 1 : prev - 1))}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-[#a02337] bg-opacity-70 text-white p-2 rounded-full hover:bg-opacity-90"
+                        aria-label="Previous image"
+                      >
+                        ←
+                      </button>
+                      <button
+                        onClick={() => setActiveImageIndex(prev => (prev === patentImages.length - 1 ? 0 : prev + 1))}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#a02337] bg-opacity-70 text-white p-2 rounded-full hover:bg-opacity-90"
+                        aria-label="Next image"
+                      >
+                        →
+                      </button>
+                    </>
+                  )}
+                </div>
+
+                {/* Thumbnails */}
+                <div className="flex space-x-2 overflow-x-auto pb-2">
+                  {patentImages.map((img, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setActiveImageIndex(index)}
+                      className={`flex-shrink-0 h-16 w-16 rounded-md overflow-hidden border-2 ${activeImageIndex === index ? 'border-[#a02337]' : 'border-transparent'}`}
+                    >
+                      <img
+                        src={img}
+                        alt={`Thumbnail ${index + 1}`}
+                        className="object-cover w-full h-full"
+                      />
+                    </button>
+                  ))}
+                </div>
+                <p className="text-sm text-gray-600 mt-1">Figure {activeImageIndex + 1} of {patentImages.length}</p>
               </div>
             )}
           </div>
