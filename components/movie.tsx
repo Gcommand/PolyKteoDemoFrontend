@@ -143,7 +143,7 @@ const Movie = ({ result }: { result: SearchResult }) => {
       const isSummaryMarker = /^summary:\s*$/i.test(trimmed) || /^#{1,6}\s*summary:\s*$/i.test(trimmed);
       if (isSummaryMarker) {
         isAfterSummary = true;
-        return `<p class="my-2">Summary:</p>`;
+        return `<h2 class="text-2xl font-bold mt-6 mb-3">Summary:</h2>`;
       }
 
       // After Summary, render everything as regular paragraphs only
